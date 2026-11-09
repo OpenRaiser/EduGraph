@@ -1,5 +1,5 @@
 const NS='http://www.w3.org/2000/svg';
-const colors={focus:['#2d6d62','#1d594e'],prerequisite:['#e2b69b','#c99473'],successor:['#afcdb9','#7fa58b'],topic:['#e0d6ad','#baa570']};
+const colors={focus:['#2563a8','#17365c'],prerequisite:['#f5c19a','#db965f'],successor:['#97d0df','#58a6bc'],topic:['#cabbdf','#a38bc3']};
 function el(tag,attrs={},text){const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,String(v));if(text!==undefined)n.textContent=text;return n;}
 function hash(str){let n=2166136261;for(const c of str)n=Math.imul(n^c.charCodeAt(0),16777619);return(n>>>0)/4294967295;}
 export class NetworkView{
@@ -17,7 +17,7 @@ export class NetworkView{
     this.svg.setAttribute('viewBox',`0 0 ${this.w} ${this.h}`);
     this.svg.replaceChildren();
     const defs=el('defs');
-    for(const [id,color]of[['arrow','#a4b8a9'],['topic-arrow','#c8b986']]){const marker=el('marker',{id,'viewBox':'0 0 10 10',refX:9,refY:5,markerWidth:5,markerHeight:5,orient:'auto-start-reverse'});marker.append(el('path',{d:'M 0 1 L 9 5 L 0 9 z',fill:color}));defs.append(marker);}
+    for(const [id,color]of[['arrow','#9cb6cf'],['topic-arrow','#baa5d4']]){const marker=el('marker',{id,'viewBox':'0 0 10 10',refX:9,refY:5,markerWidth:5,markerHeight:5,orient:'auto-start-reverse'});marker.append(el('path',{d:'M 0 1 L 9 5 L 0 9 z',fill:color}));defs.append(marker);}
     this.svg.append(defs);this.group=el('g');this.svg.append(this.group);
     const usableH=this.h-90;
     const bidirectional=data.nodes.some(n=>n.role==='prerequisite')&&data.nodes.some(n=>n.role==='successor');
@@ -63,7 +63,7 @@ export class NetworkView{
       const [fill,stroke]=colors[n.role]??colors.successor;
       if(n.role==='focus')g.append(el('circle',{r:n.r+7,class:'node-ring'}));
       g.append(el('circle',{r:n.r,fill,stroke,'stroke-width':1.5,opacity:n.depth>1?.78:1}));
-      if(n.role==='focus'){g.append(el('circle',{r:4,fill:'#e0eee4'}));}
+      if(n.role==='focus'){g.append(el('circle',{r:4,fill:'#e3f2ff'}));}
       const t=el('text',{'text-anchor':'middle',y:n.r+19});
       const chars=Array.from(n.name),max=n.role==='focus'?12:10;
       const lines=chars.length<=max?[n.name]:[chars.slice(0,max).join(''),chars.slice(max,max*2-1).join('')+(chars.length>=max*2?'…':'')];

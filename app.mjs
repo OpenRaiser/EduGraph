@@ -1,10 +1,12 @@
 import {createModel,findNodes,neighborhood,degree,orderChapters,statusLabel,SUBJECTS,STAGES} from './model.mjs';
 import {NetworkView} from './network.mjs';
+import {resolveCover} from './covers.mjs';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num=n=>Number(n??0).toLocaleString('en-US');
 const state={key:null,tab:'keypoints',view:'network',browse:'results',direction:'both',depth:2,resultLimit:60,request:0};
 let model,manifest,download,currentResources=null,standardsPromise=null;
+let coverCatalog=null,coverPromise=null;
 const resourceCache=new Map();
 let known=new Set();
 try{const saved=JSON.parse(localStorage.getItem('edugraph.known.v1')||'[]');if(Array.isArray(saved))known=new Set(saved.filter(x=>typeof x==='string'));}catch{}
@@ -16,6 +18,16 @@ async function resources(n){const scope=resourceScope(n);if(!resourceCache.has(s
 function entry(n=model.byKey.get(state.key)){return currentResources?.concepts[n?.id]??{keypoints:[],exercises:[],standards:[],teaches:[]};}
 function nodeLink(key,name,cls=''){return`<button class="${cls}" data-key="${esc(key)}">${esc(name)}</button>`;}
 function reviewTags(row){return`<div class="resource-provenance"><span>${esc(statusLabel(row.review_status))}</span>${row.authored_by==='llm-draft'?'<span>模型生成</span>':''}</div>`;}
+function loadCovers(){
+  if(!coverPromise)coverPromise=fetchJson('assets/covers/catalog.json').then(data=>{coverCatalog=data;if(state.tab==='textbooks')renderDetail();if(state.view==='textbooks')renderCenter();}).catch(()=>{});
+}
+function bookCover(book){
+  const cover=resolveCover(book,coverCatalog),label=`${book.publisher} · ${SUBJECTS[book.subject]??book.subject} · ${book.volume_label??book.volume}`;
+  const fallback=`<span class="cover-fallback" aria-hidden="true"><i>EDUGRAPH</i><strong>${esc(SUBJECTS[book.subject]??'教材')}</strong><span>${esc(book.volume_label??book.volume)}</span></span>`;
+  if(!cover)return`<span class="cover-wrap"><span class="cover-link" role="img" aria-label="${esc(label)}，暂无已匹配封面">${fallback}</span><span class="cover-credit">${coverCatalog?'册次信息':'教材'}</span></span>`;
+  const title=`${label}。同出版社、学科、系列与册次的参考封面；具体印次未核验。点击查看来源。`;
+  return`<span class="cover-wrap"><a class="cover-link" href="${esc(cover.source)}" target="_blank" rel="noopener noreferrer" title="${esc(title)}">${fallback}<img class="textbook-cover" src="${esc(cover.asset)}" alt="${esc(label)}教材参考封面" width="58" height="80" loading="lazy" decoding="async"></a><a class="cover-credit" href="${esc(cover.source)}" target="_blank" rel="noopener noreferrer" title="${esc(title)}">同册参考 ↗</a></span>`;
+}
 function saveKnown(){try{localStorage.setItem('edugraph.known.v1',JSON.stringify([...known]));}catch{toast('浏览器未允许保存，标记仅在本次访问有效。');}}
 function toggleKnown(key){if(known.has(key))known.delete(key);else known.add(key);saveKnown();renderHeading();if($('#path-dialog').open)renderPath();}
 function navigate(key){if(!model.byKey.has(key)){toast('未找到这个知识点');return;}location.hash=`/concept/${encodeURIComponent(key)}`;if(state.key===key){$('#about').hidden=true;$('#explorer').hidden=false;requestAnimationFrame(renderCenter);}}
@@ -98,9 +110,10 @@ async function renderDetail(){
     const kinds={single_choice:'单选题',multi_choice:'多选题',fill_blank:'填空题',short_answer:'简答题',calculation:'计算题',proof:'证明题',open_ended:'开放题'};
     html=r.exercises.map((e,i)=>`<article class="resource-card"><div class="card-label"><i></i>例题 ${String(i+1).padStart(2,'0')} · ${esc(kinds[e.question_kind]??e.question_kind)}</div><h3>${esc(e.stem)}</h3>${(e.choices??[]).map(c=>`<div class="exercise-choice">${esc(typeof c==='string'?c:`${c.label}. ${c.text}`)}</div>`).join('')}<details class="exercise-solution"><summary>查看答案与解析</summary><p><strong>答案：</strong>${esc(typeof e.answer==='object'?JSON.stringify(e.answer):e.answer)}</p><p>${esc(e.explanation)}</p></details>${reviewTags(e)}<div class="source-id">${esc(e.key)}</div></article>`).join('')||'<div class="empty-state">这个知识点尚无公开例题。</div>';
   }else if(state.tab==='textbooks'){
+    loadCovers();
     const books=booksForConcept();
     html='<div class="textbook-note">展示公开包中的册次、章节顺位与关联角色。顺位标签不等同于原书章节名称。</div>';
-    html+=books.map(({book,mappings})=>`<article class="resource-card textbook-mini"><h3 class="publisher-name">${esc(book.publisher)}</h3><p>${esc(book.volume_label||`${book.grade} ${book.volume}`)} · ${esc(book.edition)} 版</p>${mappings.map(({teach,chapter})=>`<div class="book-position"><span>单元顺位 ${esc(chapter.order)}</span><small>${roleName(teach.role)} · ${esc(statusLabel(teach.review_status))}</small></div>`).join('')}<button class="button" data-book="${esc(book.textbook_id)}">查看这一册的编排 →</button></article>`).join('');
+    html+=books.map(({book,mappings})=>`<article class="resource-card textbook-mini"><div class="book-overview">${bookCover(book)}<div class="book-meta"><h3 class="publisher-name">${esc(book.publisher)}</h3><p>${esc(book.volume_label||`${book.grade} ${book.volume}`)}</p><p class="book-edition">目录版本 ${esc(book.edition)} · ${esc(SUBJECTS[book.subject])}</p></div></div>${mappings.map(({teach,chapter})=>`<div class="book-position"><span>单元顺位 ${esc(chapter.order)}</span><small>${roleName(teach.role)} · ${esc(statusLabel(teach.review_status))}</small></div>`).join('')}<button class="button" data-book="${esc(book.textbook_id)}">查看这一册的编排 →</button></article>`).join('');
     if(!books.length)html+='<div class="empty-state">这个知识点尚无公开教材映射。</div>';
   }else if(state.tab==='standards'){
     $('#detail-content').innerHTML='<div class="loading-inline">正在读取课标条目…</div>';
@@ -120,10 +133,11 @@ function booksForConcept(){
 }
 function renderTextbookView(){
   if(!currentResources){$('#textbook-stage').innerHTML='<div class="loading-inline">正在加载教材视图…</div>';return;}
+  loadCovers();
   const books=booksForConcept(),publishers=new Map();for(const b of books){if(!publishers.has(b.book.publisher))publishers.set(b.book.publisher,[]);publishers.get(b.book.publisher).push(b);}
-  let html='<div class="textbook-note">同一个 Concept，在不同教材中有不同的教学位置。轨道按本册章节顺位排列，绿色标记当前知识点；每格列出该位置关联的 Concept。<strong>箭头表示教材编排顺序。</strong></div>';
+  let html='<div class="textbook-note">同一个 Concept，在不同教材中有不同的教学位置。轨道按本册章节顺位排列，蓝色标记当前知识点。<strong>箭头表示教材编排顺序。</strong><br>参考封面来自 <a href="https://github.com/TapXWorld/ChinaTextbook" target="_blank" rel="noopener noreferrer">ChinaTextbook</a>，按出版社、系列与册次匹配；不同印次的封面可能不同。</div>';
   for(const [publisher,group]of publishers){html+=`<section class="publisher-group"><div class="publisher-header"><span class="book-symbol">书</span><div><h3>${esc(publisher)}</h3><small>${group.length} 册关联教材 · 教材视图</small></div></div>`;
-    for(const{book}of group){const chapters=orderChapters(currentResources.chapters,book.textbook_id);html+=`<div class="volume-row" data-volume="${esc(book.textbook_id)}"><header><strong>${esc(book.volume_label||book.volume)}</strong><small>${esc(book.edition)} 版 · ${esc(statusLabel(book.review_status))}</small></header><div class="catalog-track">`;
+    for(const{book}of group){const chapters=orderChapters(currentResources.chapters,book.textbook_id);html+=`<div class="volume-row" data-volume="${esc(book.textbook_id)}"><header>${bookCover(book)}<div class="volume-heading"><strong>${esc(book.volume_label||book.volume)}</strong><small>目录版本 ${esc(book.edition)} · ${esc(statusLabel(book.review_status))}</small></div></header><div class="catalog-track">`;
       html+=chapters.map((c,i)=>{const concepts=currentResources.chapterConcepts[c.chapter_id]??[];const isCurrent=concepts.some(x=>model.nodes[x.id]?.key===state.key);return`${i?'<span class="track-arrow" aria-hidden="true">→</span>':''}<div class="chapter-stop ${isCurrent?'current':''}"><div class="unit-label">${c.level===1?'单元':'章节'}顺位 ${esc(c.orderPath.join('.'))}</div>${concepts.length?concepts.map(x=>{const n=model.nodes[x.id];return`<button data-key="${esc(n.key)}" class="${n.key===state.key?'current':''}" title="${esc(n.name)} · ${roleName(x.role)}">${esc(n.name)}${x.role==='review'?' · 复习':''}</button>`;}).join(''):'<span class="no-mapping">未关联 Concept</span>'}</div>`;}).join('');html+='</div></div>';}
     html+='</section>';
   }
@@ -149,6 +163,7 @@ function populateAbout(){
   $('#checksum-link').href=download.file+'.sha256';
 }
 function bind(){
+  document.addEventListener('error',event=>{if(event.target instanceof HTMLImageElement&&event.target.classList.contains('textbook-cover')){event.target.hidden=true;event.target.closest('.cover-wrap')?.classList.add('cover-unavailable');}},true);
   let searchTimer;$('#search').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>{state.resultLimit=60;if(state.browse==='tree')setBrowse('results');else renderResults();},120);});
   for(const select of ['#subject','#stage'])$(select).onchange=()=>{state.resultLimit=60;renderResults();};
   $('#browse-results').onclick=()=>setBrowse('results');$('#browse-tree').onclick=()=>setBrowse('tree');
