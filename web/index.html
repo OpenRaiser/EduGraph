@@ -4,14 +4,16 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>EduGraph — Explore connected knowledge</title>
   <meta name="description" content="Explore EduGraph: shared K–12 concepts, prerequisites, curriculum standards, textbook views, explanations and exercises.">
+  <meta name="theme-color" content="#061326">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="cosmos.css">
 </head>
 <body>
   <header class="site-header">
     <a class="brand" href="#/explore" aria-label="EduGraph 首页"><svg viewBox="0 0 36 36" aria-hidden="true"><path d="M8 24L18 8L29 23L8 24M18 8V29"/><circle cx="8" cy="24" r="4"/><circle cx="18" cy="8" r="4"/><circle cx="29" cy="23" r="4"/><circle cx="18" cy="29" r="3"/></svg><span>EduGraph<span class="brand-light"> Explorer</span></span></a>
     <nav aria-label="主导航"><a id="nav-explore" href="#/explore" class="nav-link active">知识探索</a><a id="nav-about" href="#/about" class="nav-link">关于数据集</a></nav>
-    <div class="header-end"><span class="release-pill"><i></i> Open knowledge</span><a id="download-top" class="button quiet compact" href="#/about">下载数据 <span aria-hidden="true">↗</span></a></div>
+    <div class="header-end"><span class="release-pill"><i></i> Open knowledge</span><a class="github-link" href="https://github.com/OpenRaiser/EduGraph" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a id="download-top" class="button quiet compact" href="#/about">下载数据 <span aria-hidden="true">↗</span></a></div>
   </header>
   <div id="loading" class="loading-screen"><div class="loader-orbit"></div><h1>正在连接知识…</h1><p id="loading-text">加载 EduGraph 公开数据与检索索引</p></div>
   <main id="explorer" class="workspace" hidden>
@@ -35,7 +37,10 @@
     <aside class="detail-panel" aria-label="知识点详情"><div id="detail-heading" class="detail-heading"></div><div id="detail-tabs" class="detail-tabs" role="tablist"><button class="active" data-tab="keypoints" role="tab" aria-selected="true">讲解</button><button data-tab="exercises" role="tab" aria-selected="false">例题</button><button data-tab="textbooks" role="tab" aria-selected="false">教材</button><button data-tab="standards" role="tab" aria-selected="false">课标</button></div><div id="detail-content" class="detail-content" aria-live="polite"></div><div class="detail-foot"><button id="copy-link" class="text-button">复制知识点链接 ↗</button><button id="export-node" class="text-button">导出 JSON ↓</button></div></aside>
   </main>
   <main id="about" class="about-page" hidden>
-    <section class="about-hero"><div class="eyebrow">EDUCATION AGENT DATA INFRASTRUCTURE</div><h1>知识相连，<br>学习有迹可循<span>.</span></h1><p>EduGraph 将课程标准、知识点、先修关系、教材视图、讲解与习题组织在同一数据底座中，让教育应用可以检索知识、理解关联，并构建持续的教学流程。</p><div class="hero-actions"><a href="#/explore" class="button primary">进入知识图谱 ↗</a><a id="download-about" class="button secondary" download>下载公开数据 ↓</a></div><div class="hero-annotation">共享知识 · 多教材视图 · 可追溯关联</div></section>
+    <section class="about-hero">
+      <div class="hero-copy"><div class="eyebrow">EDUCATION AGENT DATA INFRASTRUCTURE</div><h1>EduGraph<span>.</span></h1><h2>知识相连，<br>学习有迹可循。</h2><p>让课标、知识点、先修关系、教材与习题，<br class="desktop-break">在同一张图中相连。</p><div class="hero-actions"><a href="#/explore" class="button primary">进入知识图谱 ↗</a><a id="download-about" class="button secondary" download>下载公开数据 ↓</a></div><div id="hero-stats" class="hero-stats"></div></div>
+      <div class="hero-visual"><div id="hero-network" class="hero-network"></div><p class="hero-network-caption">以「分数」为例 · 点击节点探索真实关联</p></div>
+    </section>
     <div id="about-stats" class="about-stats"></div>
     <section class="about-section"><div class="section-heading"><div><div class="eyebrow">01 / CONNECTED STRUCTURE</div><h2>同一套知识，多种教材视角</h2></div><p>课程要求连接共享 Concept；不同出版社保留独立的编排顺序。</p></div><figure><img src="assets/figure-2.png" loading="lazy" alt="课标、共享知识网络与不同教材视图之间的关系"><figcaption>Figure 2 · Standards, shared concepts and textbook views.</figcaption></figure></section>
     <section class="about-section"><div class="section-heading"><div><div class="eyebrow">02 / DATA LANDSCAPE</div><h2>从知识全景，到跨学段路径</h2></div><p>涵盖十个学科，连接小学、初中与高中阶段的知识和教学资源。</p></div><figure><img src="assets/figure-3.png" loading="lazy" alt="新版 Figure 3：学科知识全景、跨学段先修链、资源覆盖及分层精度"><figcaption>Figure 3 · Concept landscape, a cross-stage prerequisite chain, coverage, and precision by layer. 图示采用论文提供的版本。</figcaption></figure></section>
