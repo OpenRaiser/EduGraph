@@ -1,0 +1,16 @@
+Textbook cover previews
+
+Source repository: https://github.com/TapXWorld/ChinaTextbook
+The accompanying catalog.json records the exact source revision, PDF path,
+source blob, and textbook-volume mappings for each preview.
+
+Only small cover previews are distributed here. Full textbook PDFs are not
+part of this website or its downloadable EduGraph JSONL release.
+
+Cover artwork and textbook content remain the property of their respective
+publishers and rights holders. These images are not relicensed under the
+Apache-2.0 code license or the CC BY-SA 4.0 EduGraph data license.
+
+Matching is based on publisher, subject, series, grade and volume. A matching
+cover does not certify the exact edition year or printing of a catalog record.
+Missing or ambiguous matches use a text-only fallback in the explorer.

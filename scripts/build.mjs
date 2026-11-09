@@ -52,7 +52,12 @@ for (const c of covers) {
   standardMap.get(c.to).push(pick(c,['from','score','method','review_status']));
 }
 await mkdir(out, { recursive: true });
-await cp(path.join(root,'web'), out, { recursive:true });
+const coverCatalog=await readJson(path.join(root,'web/assets/covers/catalog.json'));
+const publishedCovers=new Set(Object.values(coverCatalog.covers).map(c=>c.asset));
+await cp(path.join(root,'web'), out, {recursive:true,filter:sourcePath=>{
+  const relative=path.relative(path.join(root,'web'),sourcePath).split(path.sep).join('/');
+  return !/^assets\/covers\/[^/]+\.jpg$/.test(relative)||publishedCovers.has(relative);
+}});
 await cp(path.join(root,'LICENSE'),path.join(out,'LICENSE'));
 await cp(path.join(root,'LICENSE-DATA'),path.join(out,'LICENSE-DATA'));
 await writeFile(path.join(out,'.nojekyll'), '');

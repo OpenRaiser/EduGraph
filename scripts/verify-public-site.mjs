@@ -2,6 +2,7 @@ import {readdir,readFile,lstat} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 
 export function verifyReleaseArchive(archive,version='0.21.0'){
   const listing=execFileSync('tar',['-tzf',archive],{encoding:'utf8'}).split(/\r?\n/).filter(Boolean);
@@ -39,13 +40,21 @@ export function verifyArtifactPaths(files,allowed){
 export async function verifyPublicSite(root=fileURLToPath(new URL('../dist/',import.meta.url))){
   const manifest=JSON.parse(await readFile(path.join(root,'data/manifest.json'),'utf8'));
   if(!/^\d+\.\d+\.\d+$/.test(manifest.version))throw new Error('Invalid release version');
-  const allowed=new Set(['index.html','404.html','styles.css','app.mjs','model.mjs','network.mjs','.nojekyll','LICENSE','LICENSE-DATA','assets/favicon.svg','assets/figure-2.png','assets/figure-3.png','core/graph.mjs','core/bm25.mjs','core/tokenize.mjs','data/graph.json','data/search.json','data/standards.json','data/manifest.json','data/download.json',`downloads/edugraph-v${manifest.version}.tar.gz`,`downloads/edugraph-v${manifest.version}.tar.gz.sha256`]);
+  const allowed=new Set(['index.html','404.html','styles.css','app.mjs','model.mjs','network.mjs','covers.mjs','.nojekyll','LICENSE','LICENSE-DATA','assets/favicon.svg','assets/figure-2.png','assets/figure-3.png','assets/covers/catalog.json','assets/covers/NOTICE.txt','core/graph.mjs','core/bm25.mjs','core/tokenize.mjs','data/graph.json','data/search.json','data/standards.json','data/manifest.json','data/download.json',`downloads/edugraph-v${manifest.version}.tar.gz`,`downloads/edugraph-v${manifest.version}.tar.gz.sha256`]);
+  const catalog=JSON.parse(await readFile(path.join(root,'assets/covers/catalog.json'),'utf8'));
+  if(catalog.schema!==1||!(/^[0-9a-f]{40}$/).test(catalog.sourceRevision))throw new Error('Invalid cover catalog');
+  for(const [id,cover]of Object.entries(catalog.covers)){
+    if(!/^[0-9a-f]{16}$/.test(id)||cover.asset!==`assets/covers/${id}.jpg`||!cover.source.startsWith(`https://github.com/TapXWorld/ChinaTextbook/blob/${catalog.sourceRevision}/`))throw new Error('Invalid cover asset or source');
+    const bytes=await readFile(path.join(root,cover.asset));
+    if(bytes[0]!==255||bytes[1]!==216||bytes.length>500000||createHash('sha256').update(bytes).digest('hex')!==cover.imageSha256)throw new Error('Invalid cover preview: '+id);
+    allowed.add(cover.asset);
+  }
   for(const scope of manifest.scopes){
     if(!/^[a-z]+$/.test(scope.subject)||!['primary','junior','senior'].includes(scope.stage))throw new Error('Invalid public resource partition');
     allowed.add(`data/resources/${scope.subject}/${scope.stage}.json`);
   }
   const files=await listFiles(root);verifyArtifactPaths(files,allowed);
   const archiveEntries=verifyReleaseArchive(path.join(root,`downloads/edugraph-v${manifest.version}.tar.gz`),manifest.version);
-  return{ok:true,files:files.length,archiveEntries,version:manifest.version,scope:'Public explorer runtime, approved figures, and public education data only'};
+  return{ok:true,files:files.length,coverImages:Object.keys(catalog.covers).length,archiveEntries,version:manifest.version,scope:'Public explorer, attributed cover previews, approved figures, and public education data only'};
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url))console.log(JSON.stringify(await verifyPublicSite(),null,2));

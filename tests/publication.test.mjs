@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {verifyPublicSite,verifyArtifactPaths} from '../scripts/verify-public-site.mjs';
 test('The complete Pages artifact contains only the approved public site and data',async()=>{
-  const result=await verifyPublicSite();assert.equal(result.ok,true);assert.equal(result.files,46);
+  const result=await verifyPublicSite();assert.equal(result.ok,true);assert.equal(result.files,49+result.coverImages);
 });
 test('Publication rejects manuscript files, local credentials, and other unexpected additions',()=>{
   const allowed=new Set(['index.html','data/graph.json']);
