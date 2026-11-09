@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="340" viewBox="0 0 1200 340" role="img" aria-labelledby="title desc">
+  <title id="title">EduGraph: from connected data to usable context</title>
+  <desc id="desc">A schematic of educational resources connected by shared concept identifiers. Concepts form a hierarchy and prerequisite network. Query modules supply search results, learning paths and teaching resources to an application.</desc>
+  <defs>
+    <linearGradient id="background" x2="1" y2="1"><stop stop-color="#f1f7fd"/><stop offset="1" stop-color="#fcfaf5"/></linearGradient>
+    <marker id="blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#7b9cbd"/></marker>
+    <marker id="apricot" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#ce956c"/></marker>
+    <marker id="sage" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#839e94"/></marker>
+  </defs>
+  <rect x="1" y="1" width="1198" height="338" rx="22" fill="url(#background)" stroke="#dce5ec"/>
+  <g font-family="Segoe UI,Arial,sans-serif">
+    <text x="30" y="39" font-size="22" font-weight="700" fill="#234467">From connected data to usable context</text>
+    <text x="1170" y="38" text-anchor="end" font-size="11" font-weight="600" letter-spacing="1.6" fill="#7990a5">EDUGRAPH · DATA ACCESS OVERVIEW</text>
+    <rect x="26" y="63" width="274" height="225" rx="16" fill="#fff" stroke="#dfe7ed"/>
+    <rect x="342" y="63" width="450" height="225" rx="16" fill="#fff" stroke="#dfe7ed"/>
+    <rect x="834" y="63" width="340" height="225" rx="16" fill="#fff" stroke="#dfe7ed"/>
+    <g font-size="12" font-weight="700" letter-spacing="1.1" fill="#59768f">
+      <text x="46" y="88">01 · CONNECT RESOURCES</text>
+      <text x="362" y="88">02 · QUERY SHARED KNOWLEDGE</text>
+      <text x="854" y="88">03 · BUILD YOUR APPLICATION</text>
+    </g>
+    <g font-size="15" fill="#34516d">
+      <rect x="45" y="106" width="236" height="34" rx="8" fill="#fbf2e9"/>
+      <rect x="45" y="149" width="236" height="34" rx="8" fill="#edf4ef"/>
+      <rect x="45" y="192" width="236" height="34" rx="8" fill="#eef4fb"/>
+      <rect x="45" y="235" width="236" height="34" rx="8" fill="#f3f0f8"/>
+      <text x="58" y="128">Curriculum standards</text>
+      <text x="58" y="171">Textbook chapters</text>
+      <text x="58" y="214">KeyPoints</text>
+      <text x="58" y="257">Exercises</text>
+      <g font-size="10" text-anchor="end" fill="#73869a">
+        <text x="269" y="128">COVERS</text><text x="269" y="171">TEACHES</text>
+        <text x="269" y="214">kp_key</text><text x="269" y="257">kp_keys</text>
+      </g>
+    </g>
+    <path d="M306 184H334" stroke="#7b9cbd" stroke-width="2" marker-end="url(#blue)"/>
+    <path d="M798 184H826" stroke="#7b9cbd" stroke-width="2" marker-end="url(#blue)"/>
+    <g>
+      <rect x="519" y="108" width="96" height="30" rx="15" fill="#edf4ef" stroke="#c1d4c9"/>
+      <text x="567" y="128" text-anchor="middle" font-size="14" fill="#557668">Topic</text>
+      <path d="M567 156V140" stroke="#839e94" stroke-width="1.8" marker-end="url(#sage)"/>
+      <text x="580" y="153" font-size="10" fill="#6f8c81">REFINES</text>
+      <path d="M459 193H525" stroke="#ce956c" stroke-width="2" marker-end="url(#apricot)"/>
+      <path d="M609 193H675" stroke="#ce956c" stroke-width="2" marker-end="url(#apricot)"/>
+      <circle cx="439" cy="193" r="20" fill="#f5decb" stroke="#ceac90" stroke-width="1.5"/>
+      <circle cx="567" cy="193" r="40" fill="#e6eff9"/>
+      <circle cx="567" cy="193" r="33" fill="#356a9d"/>
+      <circle cx="697" cy="193" r="20" fill="#e1ebf6" stroke="#99b2ce" stroke-width="1.5"/>
+      <text x="567" y="198" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">Concept</text>
+      <g text-anchor="middle" font-size="13" fill="#536e87">
+        <text x="439" y="230">Prerequisite</text><text x="697" y="230">Successor</text>
+      </g>
+      <text x="567" y="265" text-anchor="middle" font-size="11" fill="#8c735e">PREREQUISITE: before → after</text>
+    </g>
+    <g fill="#34516d">
+      <circle cx="863" cy="126" r="4" fill="#7d9fbc"/><text x="877" y="131" font-size="15" font-weight="600">Retrieve and trace</text>
+      <text x="877" y="152" font-size="12" fill="#71869a">Concept matches and graph neighbors</text>
+      <path d="M854 166H1154" stroke="#e9eef2"/>
+      <circle cx="863" cy="188" r="4" fill="#c79c7c"/><text x="877" y="193" font-size="15" font-weight="600">Organize a learning path</text>
+      <text x="877" y="214" font-size="12" fill="#71869a">Targets, known concepts, prerequisites</text>
+      <path d="M854 228H1154" stroke="#e9eef2"/>
+      <circle cx="863" cy="250" r="4" fill="#8ea89a"/><text x="877" y="255" font-size="15" font-weight="600">Reuse teaching resources</text>
+      <text x="877" y="276" font-size="12" fill="#71869a">Structured context for your tutoring agent</text>
+    </g>
+    <text x="30" y="316" font-size="12" fill="#6d8498">Stable concept keys · Publisher-specific views · Source and review metadata</text>
+    <text x="1170" y="316" text-anchor="end" font-size="12" font-weight="600" fill="#55728c">OPEN JSONL DATA + QUERY MODULES</text>
+  </g>
+</svg>
