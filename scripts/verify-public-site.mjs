@@ -42,7 +42,7 @@ export async function verifyPublicSite(root=fileURLToPath(new URL('../dist/',imp
   if(!/^\d+\.\d+\.\d+$/.test(manifest.version))throw new Error('Invalid release version');
   const allowed=new Set(['index.html','404.html','styles.css','app.mjs','model.mjs','network.mjs','covers.mjs','.nojekyll','LICENSE','LICENSE-DATA','assets/favicon.svg','assets/figure-2.png','assets/figure-3.png','assets/covers/catalog.json','assets/covers/NOTICE.txt','core/graph.mjs','core/bm25.mjs','core/tokenize.mjs','data/graph.json','data/search.json','data/standards.json','data/manifest.json','data/download.json',`downloads/edugraph-v${manifest.version}.tar.gz`,`downloads/edugraph-v${manifest.version}.tar.gz.sha256`]);
   const catalog=JSON.parse(await readFile(path.join(root,'assets/covers/catalog.json'),'utf8'));
-  for(const file of ['cosmos.css','hero.mjs','assets/cosmic-stars.svg','assets/cosmic-nebula.svg'])allowed.add(file);
+  for(const file of ['learning.css','hero.mjs'])allowed.add(file);
   if(catalog.schema!==1||!(/^[0-9a-f]{40}$/).test(catalog.sourceRevision))throw new Error('Invalid cover catalog');
   for(const [id,cover]of Object.entries(catalog.covers)){
     if(!/^[0-9a-f]{16}$/.test(id)||cover.asset!==`assets/covers/${id}.jpg`||!cover.source.startsWith(`https://github.com/TapXWorld/ChinaTextbook/blob/${catalog.sourceRevision}/`))throw new Error('Invalid cover asset or source');

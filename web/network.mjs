@@ -1,5 +1,5 @@
 const NS='http://www.w3.org/2000/svg';
-const colors={focus:['#0599f5','#004ca9','#83e6ff'],prerequisite:['#ffd39a','#e69a51','#ffe1b7'],successor:['#7cebf4','#20a9c5','#a2f4ff'],topic:['#d3b1f4','#8b6cbd','#e7ceff']};
+const colors={focus:['#5d8aa8','#416f90'],prerequisite:['#f0d3b4','#bf9467'],successor:['#c4dbe9','#7e9fb9'],topic:['#ded2e9','#a792bb']};
 function el(tag,attrs={},text){const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,String(v));if(text!==undefined)n.textContent=text;return n;}
 function hash(str){let n=2166136261;for(const c of str)n=Math.imul(n^c.charCodeAt(0),16777619);return(n>>>0)/4294967295;}
 export class NetworkView{
@@ -17,12 +17,11 @@ export class NetworkView{
     this.svg.setAttribute('viewBox',`0 0 ${this.w} ${this.h}`);
     this.svg.replaceChildren();
     const defs=el('defs');
-    for(const [id,color]of[['arrow','#6acbdf'],['topic-arrow','#b6a2dc']]){const marker=el('marker',{id,'viewBox':'0 0 10 10',refX:9,refY:5,markerWidth:5,markerHeight:5,orient:'auto-start-reverse'});marker.append(el('path',{d:'M 0 1 L 9 5 L 0 9 z',fill:color}));defs.append(marker);}
-    for(const [role,[light,dark]]of Object.entries(colors)){const gradient=el('radialGradient',{id:`node-${role}`,cx:'32%',cy:'23%',r:'85%'});gradient.append(el('stop',{offset:'0%','stop-color':light}),el('stop',{offset:'100%','stop-color':dark}));defs.append(gradient);}
+    for(const [id,color]of[['arrow','#7898ae'],['topic-arrow','#ad9abd'],['prerequisite-arrow','#bf986e']]){const marker=el('marker',{id,'viewBox':'0 0 10 10',refX:9,refY:5,markerWidth:5,markerHeight:5,orient:'auto-start-reverse'});marker.append(el('path',{d:'M 0 1 L 9 5 L 0 9 z',fill:color}));defs.append(marker);}
     this.svg.append(defs);this.group=el('g');this.svg.append(this.group);
-    const usableH=this.h-90;
+    const bottomInset=this.w<500?95:70,usableH=this.h-bottomInset-20;
     const bidirectional=data.nodes.some(n=>n.role==='prerequisite')&&data.nodes.some(n=>n.role==='successor');
-    this.nodes=data.nodes.map(n=>({...n,x:this.w*(n.role==='focus'?.5:n.role==='topic'?.2:bidirectional?(n.role==='prerequisite'?.3:.7):.5)+(hash(n.key)-.5)*this.w*.6,y:n.role==='focus'?this.h*.49:45+hash(n.key+'y')*usableH,vx:0,vy:0,r:n.role==='focus'?21:n.role==='topic'?7:n.depth===1?13:9}));
+    this.nodes=data.nodes.map(n=>({...n,x:this.w*(n.role==='focus'?.5:n.role==='topic'?.2:bidirectional?(n.role==='prerequisite'?.3:.7):.5)+(hash(n.key)-.5)*this.w*.6,y:n.role==='focus'?this.h*.49:45+hash(n.key+'y')*usableH,vx:0,vy:0,r:n.role==='focus'?31:n.role==='topic'?6:n.depth===1?9:6.5}));
     this.nodeById=new Map(this.nodes.map(n=>[n.id,n]));
     this.edges=data.edges.map(e=>({...e,a:this.nodeById.get(e.from),b:this.nodeById.get(e.to)}));
     // Deterministic, bounded force layout; only the selected neighborhood is laid out.
@@ -42,7 +41,7 @@ export class NetworkView{
         n.vx+=(tx-n.x)*.007*alpha;n.vy+=(this.h*.48-n.y)*.004*alpha;
         if(n.role==='focus'){n.vx+=(this.w*.49-n.x)*.12;n.vy+=(this.h*.48-n.y)*.12;}
         n.x+=n.vx*=.65;n.y+=n.vy*=.65;
-        n.x=Math.max(65,Math.min(this.w-65,n.x));n.y=Math.max(55,Math.min(this.h-65,n.y));
+        n.x=Math.max(65,Math.min(this.w-65,n.x));n.y=Math.max(55,Math.min(this.h-bottomInset,n.y));
       }
     }
     // Resolve label boxes as well as circles: Chinese concept names need more room.
@@ -56,17 +55,18 @@ export class NetworkView{
         if(ox<oy){const push=Math.min(ox+1,12)*.6*(dx>=0?1:-1);a.x-=push*aMove;b.x+=push*bMove;}
         else{const push=Math.min(oy+1,12)*.6*(dy>=0?1:-1);a.y-=push*aMove;b.y+=push*bMove;}
       }
-      for(const n of this.nodes){n.x=Math.max(65,Math.min(this.w-65,n.x));n.y=Math.max(50,Math.min(this.h-70,n.y));}
+      for(const n of this.nodes){n.x=Math.max(65,Math.min(this.w-65,n.x));n.y=Math.max(50,Math.min(this.h-bottomInset,n.y));}
     }
-    this.lineEls=this.edges.map(e=>{const line=el('path',{class:`graph-edge ${e.type==='REFINES'?'topic':''}`,'marker-end':`url(#${e.type==='REFINES'?'topic-arrow':'arrow'})`});const title=el('title',{},`${e.a.name} → ${e.b.name}\n${e.type==='REFINES'?'属于主题':'先修关系'}${e.rationale?'\n'+e.rationale:''}`);line.append(title);this.group.append(line);return line;});
+    this.lineEls=this.edges.map(e=>{const role=e.type==='REFINES'?'topic':e.a.role==='prerequisite'&&['prerequisite','focus'].includes(e.b.role)?'prerequisite':'';const line=el('path',{class:`graph-edge ${role}`,'marker-end':`url(#${role?role+'-':''}arrow)`});const title=el('title',{},`${e.a.name} → ${e.b.name}\n${e.type==='REFINES'?'属于主题':'先修关系'}${e.rationale?'\n'+e.rationale:''}`);line.append(title);this.group.append(line);return line;});
     this.nodeEls=this.nodes.map(n=>{
       const g=el('g',{class:`graph-node ${n.role==='focus'?'selected':''} ${n.depth>1&&n.role!=='focus'?'indirect':''}`,'data-node':n.id,tabindex:0,role:'button','aria-label':`查看${n.name}`});
-      const role=colors[n.role]?n.role:'successor',stroke=colors[role][2];
-      if(n.role==='focus')g.append(el('circle',{r:n.r+13,class:'node-halo'}));
+      const role=colors[n.role]?n.role:'successor',[fill,stroke]=colors[role];
+      g.append(el('circle',{r:Math.max(n.r,16),class:'node-hit',fill:'transparent'}));
       if(n.role==='focus')g.append(el('circle',{r:n.r+7,class:'node-ring'}));
-      g.append(el('circle',{r:n.r,fill:`url(#node-${role})`,stroke,'stroke-width':1.3,opacity:n.depth>1?.86:1}));
-      if(n.role==='focus'){g.append(el('circle',{r:4,fill:'#e3f2ff'}));}
-      const t=el('text',{'text-anchor':'middle',y:n.r+19});
+      g.append(el('circle',{r:n.r,class:'node-dot',fill,stroke,'stroke-width':1.3,opacity:n.depth>1?.94:1}));
+      const centered=n.role==='focus'&&Array.from(n.name).length<=3;
+      if(n.role==='focus'&&!centered)g.append(el('circle',{r:3,fill:'#fff'}));
+      const t=el('text',{'text-anchor':'middle',y:centered?6:n.r+19,class:centered?'centered-label':''});
       const chars=Array.from(n.name),max=n.role==='focus'?12:10;
       const lines=chars.length<=max?[n.name]:[chars.slice(0,max).join(''),chars.slice(max,max*2-1).join('')+(chars.length>=max*2?'…':'')];
       lines.forEach((s,i)=>t.append(el('tspan',{x:0,dy:i?14:0},s)));g.append(t);

@@ -1,4 +1,4 @@
-import { readdir, readFile, writeFile, mkdir, cp, stat } from 'node:fs/promises';
+import { readdir, readFile, writeFile, mkdir, cp, stat, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
@@ -52,6 +52,8 @@ for (const c of covers) {
   standardMap.get(c.to).push(pick(c,['from','score','method','review_status']));
 }
 await mkdir(out, { recursive: true });
+// Remove only retired theme files when rebuilding an existing output directory.
+for(const legacy of ['cosmos.css','assets/cosmic-stars.svg','assets/cosmic-nebula.svg'])await rm(path.join(out,legacy),{force:true});
 const coverCatalog=await readJson(path.join(root,'web/assets/covers/catalog.json'));
 const publishedCovers=new Set(Object.values(coverCatalog.covers).map(c=>c.asset));
 await cp(path.join(root,'web'), out, {recursive:true,filter:sourcePath=>{
