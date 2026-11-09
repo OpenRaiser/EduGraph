@@ -1,5 +1,5 @@
 const NS='http://www.w3.org/2000/svg';
-const colors={focus:['#2563a8','#17365c'],prerequisite:['#f5c19a','#db965f'],successor:['#97d0df','#58a6bc'],topic:['#cabbdf','#a38bc3']};
+const colors={focus:['#0599f5','#004ca9','#83e6ff'],prerequisite:['#ffd39a','#e69a51','#ffe1b7'],successor:['#7cebf4','#20a9c5','#a2f4ff'],topic:['#d3b1f4','#8b6cbd','#e7ceff']};
 function el(tag,attrs={},text){const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,String(v));if(text!==undefined)n.textContent=text;return n;}
 function hash(str){let n=2166136261;for(const c of str)n=Math.imul(n^c.charCodeAt(0),16777619);return(n>>>0)/4294967295;}
 export class NetworkView{
@@ -17,7 +17,8 @@ export class NetworkView{
     this.svg.setAttribute('viewBox',`0 0 ${this.w} ${this.h}`);
     this.svg.replaceChildren();
     const defs=el('defs');
-    for(const [id,color]of[['arrow','#9cb6cf'],['topic-arrow','#baa5d4']]){const marker=el('marker',{id,'viewBox':'0 0 10 10',refX:9,refY:5,markerWidth:5,markerHeight:5,orient:'auto-start-reverse'});marker.append(el('path',{d:'M 0 1 L 9 5 L 0 9 z',fill:color}));defs.append(marker);}
+    for(const [id,color]of[['arrow','#6acbdf'],['topic-arrow','#b6a2dc']]){const marker=el('marker',{id,'viewBox':'0 0 10 10',refX:9,refY:5,markerWidth:5,markerHeight:5,orient:'auto-start-reverse'});marker.append(el('path',{d:'M 0 1 L 9 5 L 0 9 z',fill:color}));defs.append(marker);}
+    for(const [role,[light,dark]]of Object.entries(colors)){const gradient=el('radialGradient',{id:`node-${role}`,cx:'32%',cy:'23%',r:'85%'});gradient.append(el('stop',{offset:'0%','stop-color':light}),el('stop',{offset:'100%','stop-color':dark}));defs.append(gradient);}
     this.svg.append(defs);this.group=el('g');this.svg.append(this.group);
     const usableH=this.h-90;
     const bidirectional=data.nodes.some(n=>n.role==='prerequisite')&&data.nodes.some(n=>n.role==='successor');
@@ -60,9 +61,10 @@ export class NetworkView{
     this.lineEls=this.edges.map(e=>{const line=el('path',{class:`graph-edge ${e.type==='REFINES'?'topic':''}`,'marker-end':`url(#${e.type==='REFINES'?'topic-arrow':'arrow'})`});const title=el('title',{},`${e.a.name} → ${e.b.name}\n${e.type==='REFINES'?'属于主题':'先修关系'}${e.rationale?'\n'+e.rationale:''}`);line.append(title);this.group.append(line);return line;});
     this.nodeEls=this.nodes.map(n=>{
       const g=el('g',{class:`graph-node ${n.role==='focus'?'selected':''} ${n.depth>1&&n.role!=='focus'?'indirect':''}`,'data-node':n.id,tabindex:0,role:'button','aria-label':`查看${n.name}`});
-      const [fill,stroke]=colors[n.role]??colors.successor;
+      const role=colors[n.role]?n.role:'successor',stroke=colors[role][2];
+      if(n.role==='focus')g.append(el('circle',{r:n.r+13,class:'node-halo'}));
       if(n.role==='focus')g.append(el('circle',{r:n.r+7,class:'node-ring'}));
-      g.append(el('circle',{r:n.r,fill,stroke,'stroke-width':1.5,opacity:n.depth>1?.78:1}));
+      g.append(el('circle',{r:n.r,fill:`url(#node-${role})`,stroke,'stroke-width':1.3,opacity:n.depth>1?.86:1}));
       if(n.role==='focus'){g.append(el('circle',{r:4,fill:'#e3f2ff'}));}
       const t=el('text',{'text-anchor':'middle',y:n.r+19});
       const chars=Array.from(n.name),max=n.role==='focus'?12:10;

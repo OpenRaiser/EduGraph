@@ -1,12 +1,14 @@
 import {createModel,findNodes,neighborhood,degree,orderChapters,statusLabel,SUBJECTS,STAGES} from './model.mjs';
 import {NetworkView} from './network.mjs';
 import {resolveCover} from './covers.mjs';
+import {renderHero} from './hero.mjs';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num=n=>Number(n??0).toLocaleString('en-US');
 const state={key:null,tab:'keypoints',view:'network',browse:'results',direction:'both',depth:2,resultLimit:60,request:0};
 let model,manifest,download,currentResources=null,standardsPromise=null;
 let coverCatalog=null,coverPromise=null;
+let heroLoaded=false;
 const resourceCache=new Map();
 let known=new Set();
 try{const saved=JSON.parse(localStorage.getItem('edugraph.known.v1')||'[]');if(Array.isArray(saved))known=new Set(saved.filter(x=>typeof x==='string'));}catch{}
@@ -34,7 +36,7 @@ function navigate(key){if(!model.byKey.has(key)){toast('未找到这个知识点
 function pathFromHash(){const match=location.hash.match(/^#\/concept\/(.+)$/);if(!match)return null;try{return decodeURIComponent(match[1]);}catch{return null;}}
 async function route(){
   const about=location.hash==='#/about';$('#about').hidden=!about;$('#explorer').hidden=about;$('#nav-about').classList.toggle('active',about);$('#nav-explore').classList.toggle('active',!about);
-  if(about){document.title='EduGraph — 关于数据集';return;}
+  if(about){document.title='EduGraph — 关于数据集';loadHeroResources();return;}
   const requested=pathFromHash();
   if(requested&&!model.byKey.has(requested))toast('这个链接中的知识点不存在，已返回默认知识点。');
   const key=model.byKey.has(requested)?requested:(state.key??manifest.defaultKey);
@@ -157,10 +159,16 @@ function renderPath(){
 }
 function populateAbout(){
   const c=manifest.counts;$('#sidebar-stat').textContent=`${num(c.knowledge_points)} concepts · 10 subjects`;
+  $('#hero-stats').innerHTML=[[c.knowledge_points,'CONCEPTS'],[new Set(manifest.scopes.map(s=>s.subject)).size,'SUBJECTS'],[new Set(manifest.scopes.map(s=>s.stage)).size,'LEARNING STAGES']].map(([value,label])=>`<div><strong>${num(value)}</strong><span>${label}</span></div>`).join('');
+  renderHero($('#hero-network'),model);
   $('#about-stats').innerHTML=[[c.knowledge_points,'Concepts / 知识点'],[c.topic_nodes,'Topics / 主题'],[c.prerequisite_edges,'Prerequisites / 先修'],[c.keypoints,'KeyPoints / 讲解'],[c.exercises,'Exercises / 习题'],[c.textbooks,'Volumes / 教材册次']].map(([value,label])=>`<div><strong>${num(value)}</strong><span>${label}</span></div>`).join('');
   for(const id of ['#download-about','#download-card','#download-top']){$(id).href=download.file;$(id).setAttribute('download','');}
   $('#download-description').textContent=`v${manifest.version} · JSONL + manifest · ${(download.bytes/1048576).toFixed(1)} MiB · tar.gz`;
   $('#checksum-link').href=download.file+'.sha256';
+}
+async function loadHeroResources(){
+  if(heroLoaded)return;
+  try{const data=await resources(model.byKey.get(manifest.defaultKey));renderHero($('#hero-network'),model,data);heroLoaded=true;}catch{/* Keep the graph and links usable if resource loading needs a retry. */}
 }
 function bind(){
   document.addEventListener('error',event=>{if(event.target instanceof HTMLImageElement&&event.target.classList.contains('textbook-cover')){event.target.hidden=true;event.target.closest('.cover-wrap')?.classList.add('cover-unavailable');}},true);
@@ -173,6 +181,7 @@ function bind(){
   $('#view-network').onclick=()=>setView('network');$('#view-textbooks').onclick=()=>setView('textbooks');
   for(const b of $$('#detail-tabs button'))b.onclick=()=>{state.tab=b.dataset.tab;renderDetail();};
   document.addEventListener('click',e=>{
+    const heroLink=e.target.closest('[data-hero-tab]');if(heroLink){e.preventDefault();state.tab=heroLink.dataset.heroTab;const same=state.key===heroLink.dataset.key;navigate(heroLink.dataset.key);if(same)renderDetail();return;}
     const link=e.target.closest('[data-key]');if(link){if($('#path-dialog').open)$('#path-dialog').close();navigate(link.dataset.key);return;}
     const know=e.target.closest('[data-known]');if(know){toggleKnown(know.dataset.known);return;}
     const book=e.target.closest('[data-book]');if(book){setView('textbooks');const row=$$('[data-volume]').find(el=>el.dataset.volume===book.dataset.book);row?.scrollIntoView({behavior:'smooth',block:'nearest'});}

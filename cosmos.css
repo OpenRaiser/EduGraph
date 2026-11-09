@@ -1,0 +1,113 @@
+/* A2 / Cosmic ocean: a quiet reading surface around a luminous knowledge canvas. */
+:root{color-scheme:dark;--ink:#eaf4ff;--muted:#a3bbd3;--blue:#72d9ff;--blue-dark:#b2efff;--line:#203d59;--soft:#102842;--cyan:#48d9ed;--coral:#ffb065;--gold:#c3a4ed;--white:#eaf4ff;--shadow:0 12px 36px #0005;--page:#061326;--panel:#08182d;--subtle:#8aa8c5;--cosmic-grid:linear-gradient(#4c96c70a 1px,transparent 1px),linear-gradient(90deg,#4c96c70a 1px,transparent 1px)}
+body{background:var(--page);color:var(--ink)}
+::selection{background:#136b9c;color:#fff}
+button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid #72e7ff;outline-offset:3px}
+select{background:#0b2038;color:var(--ink)}
+select option{background:#0b2038;color:var(--ink)}
+.site-header{background:linear-gradient(100deg,#071629f5,#061326f5),url('assets/cosmic-stars.svg');border-color:var(--line)}
+.brand{color:#f5f9ff}.brand svg{fill:#159de9;stroke:#48c5fa;filter:drop-shadow(0 0 6px #0385e438)}
+.brand-light{color:#acc7df}.nav-link{color:#b4c7dc}.nav-link:hover,.nav-link.active{color:#8be7ff}
+.nav-link.active:after{background:linear-gradient(90deg,#00b6ef,#92ecff);box-shadow:0 0 10px #00b9ef4d}
+.release-pill{color:#a5c5dd}.release-pill i,.live-dot{background:#59e4ef;box-shadow:0 0 8px #59e4ef55}
+.github-link{font-size:12px;color:#b6cde3}.github-link:hover{color:#8be7ff}
+.header-end{gap:18px}.button{transition:background .15s,transform .15s,box-shadow .15s}
+.button.primary{background:linear-gradient(120deg,#0876ed,#087be4 58%,#0aa4cf);border:1px solid #439fe8;color:white;box-shadow:0 3px 16px #0068e524,inset 0 1px #8ad8ff38}
+.button.primary:hover{background:linear-gradient(120deg,#1288ff,#069dd9);box-shadow:0 4px 22px #00a1eb3d}
+.button.secondary,.button.quiet{background:linear-gradient(125deg,#102b48,#091c32);border:1px solid #315a7d;color:#e2f2ff}
+.button.secondary:hover,.button.quiet:hover{background:#143652;border-color:#5b9bcb}
+.eyebrow{color:#a4c3dc}.accent-dot{color:var(--coral)}
+.search-panel,.detail-panel{background:linear-gradient(145deg,#091a30,#071529);border-color:var(--line)}
+.search-box{background:linear-gradient(120deg,#102b46,#0c2038);border-color:#2b5275;box-shadow:inset 0 1px #548cbb10}
+.search-box:focus-within{border-color:#53bbef;box-shadow:0 0 0 2px #24b4f017}
+.search-box svg{stroke:#9bcaeb}.search-box input::placeholder{color:#9bb8d3}.search-box kbd{color:#acc6dd;border-color:#345777}
+.filter-row select{background:#0b2038;color:#d4e9fa;border-color:#2b4e6d}
+.sidebar-tabs button,.sidebar-tabs>span{color:#9ebbd5}.sidebar-tabs button.active{color:#80e4ff}
+.sidebar-tabs button.active:after,.detail-tabs button.active:after{background:#36c7f2;box-shadow:0 0 9px #20bdf152}
+.result-list,.detail-content{scrollbar-color:#2b4d70 transparent}
+.result-item{border-radius:7px}.result-item:hover{background:#102a43}
+.result-item.active{background:linear-gradient(125deg,#103d71,#0c264a);border-color:#317bb9;box-shadow:inset 0 1px #55b7fa22}
+.result-item.active:before{background:#24c3f9;box-shadow:0 0 9px #00bfff6b}
+.result-item h3,.result-item.active h3{color:#eef7ff}.result-item .result-arrow{color:#61dbff}
+.result-path,.result-meta .connection-count{color:#a0bbd4}.mini-pill{background:#15304b;color:#bddaf0}.active .mini-pill{background:#194576;color:#d9f0ff}
+.sidebar-foot{color:#91b4d1}.tree-node summary{color:#c9e3f7}.tree-children{border-color:#284762}
+.tree-leaf.active{background:#153c64;color:#87e7ff}.tree-leaf:hover{background:#102b44}.query-note{color:#94b3cf}
+.graph-panel{background-color:#071b32;background-image:radial-gradient(ellipse at 55% 40%,#07537532,transparent 66%),var(--cosmic-grid);background-size:auto,24px 24px,24px 24px;isolation:isolate}
+.graph-top,.graph-controls,.graph-legend,.graph-footer{position:relative;z-index:2}
+.view-switch{background:#0b203a;border:1px solid #2c4e72;box-shadow:inset 0 1px #6ba9d312}
+.view-switch button{color:#b1cce1}.view-switch button.active{color:#fff;background:linear-gradient(135deg,#078cdd,#0862bf);box-shadow:inset 0 0 0 1px #5ad5ff65,0 0 14px #0084e525}
+.segmented button{background:#0b223b;color:#c2dfef;border-color:#2b5374}.segmented button.active{background:linear-gradient(130deg,#0868a2,#124677);color:#fff;border-color:#288cbd}
+.depth-control,.depth-control select{color:#b4d4e9}
+.network-stage{background:transparent;isolation:isolate}
+.network-stage:before,.network-stage:after{content:"";position:absolute;pointer-events:none;z-index:0}
+.network-stage:before{inset:-4%;background:url('assets/cosmic-nebula.svg') center/cover no-repeat;opacity:.72}
+.network-stage:after{inset:-5%;background:url('assets/cosmic-stars.svg') center/1050px 760px;opacity:.67;animation:cosmic-drift 150s ease-in-out infinite alternate}
+.network-stage>svg{z-index:1}.graph-status,.canvas-hint,.canvas-tools{z-index:2}
+.graph-edge{stroke:#68bbd6;stroke-width:1.2;opacity:.73}.graph-edge.topic{stroke:#b5a0df;opacity:.7;stroke-dasharray:4 5}
+.graph-node circle{filter:drop-shadow(0 0 3px #32d7e42a)}
+.graph-node text{fill:#e5f4ff;stroke:#081c32;stroke-width:3.5;font-size:12px}
+.graph-node.indirect text{fill:#b7d3e9;font-size:11px}.graph-node.selected text{fill:#fff;stroke:#08213d;font-size:16px}
+.graph-node .node-halo{fill:#0a9eea12;stroke:#4cdfff24;stroke-width:5;filter:drop-shadow(0 0 10px #08c4ff90)}
+.graph-node .node-ring{stroke:#91eaff;stroke-width:2;fill:#0b99e522;filter:drop-shadow(0 0 7px #08c4ffb0)}
+.graph-node:hover circle,.graph-node:focus-visible circle{stroke:#e6fbff;stroke-width:2.5;filter:drop-shadow(0 0 7px #52e4ff99)}
+.graph-status,.canvas-hint{color:#9dbfd8}.canvas-tools{background:#0a2037ed;border-color:#305575;box-shadow:0 6px 25px #0004}
+.canvas-tools button{color:#d0e9fd}.canvas-tools button+button{border-color:#264865}.canvas-tools button:hover{background:#193c59}
+.graph-tooltip{background:#0d2942f5;border-color:#467392;color:#e4f4ff;box-shadow:0 8px 24px #0005}
+.graph-legend,.edge-key{color:#a7c5dc}.legend-dot.focus{background:#199ce9;box-shadow:0 0 5px #37b9ff70}.legend-dot.prerequisite{background:#f4b875}.legend-dot.successor{background:#63dfef}.legend-dot.topic{background:#c8a5ec}
+.graph-footer{background:linear-gradient(100deg,#0a233f,#08172c);border-color:#264462}.graph-footer p{color:#a7c5dd}
+.detail-heading .meta-top,.detail-heading .meta-top .small-tag{color:#a5c9e6}.breadcrumb{color:#98b8d4}
+.node-tags .tag{background:#15314d;color:#c0d9ef}.known-button,.known-button.active{color:#80d9fb}
+.node-counts{border-color:var(--line)}.node-counts>div:not(:first-child){border-color:#24435e}.node-counts span{color:#9dbed9}
+.detail-tabs button{color:#abc5dc}.detail-tabs button.active{color:#7ce6ff}.detail-tabs .tab-count{color:#94bddc}
+.resource-card{background:linear-gradient(140deg,#0b223c,#091a30);border-color:#274a68;box-shadow:inset 0 1px #6b9dc810}
+.resource-card .card-label{color:#a6cce3}.resource-card p{color:#bed4e7}.card-label i{background:#64def0}
+.resource-provenance{color:#9cbbd3}.resource-provenance span{border-color:#2b4b66;background:#0b2037}
+.section-mini,.standard-meta{color:#a5c6dd}.source-id{color:#7f9fbc}.related-link{border-color:#203e59;color:#c1dcf0}.related-link span{color:#a0bed4}
+.text-button{color:#9eccea}.text-button:hover{color:#83eaff}.empty-state,.empty-state strong{color:#abc7dc}
+.exercise-choice{background:#0c223a;color:#c5e0f2;border-color:#264762}.exercise-solution{border-color:#365a76}.exercise-solution summary{color:#83e2ff}
+.standard-card{border-left-color:#dba368}.textbook-note{background:#0c223b;color:#b5cee4;border-color:#284b68}.textbook-note a{color:#82deff}
+.publisher-group{background:#091c33;border-color:#284867}.publisher-header{background:linear-gradient(105deg,#102d49,#0a1e35);border-color:#284867}.publisher-header h3{color:#d9efff}.publisher-header small{color:#97bdd9}
+.book-symbol{background:#143958;border-left-color:#43baf5;color:#9ce8ff}
+.volume-row,.textbook-mini .book-position{border-color:#24435e}.volume-row header,.volume-heading strong{color:#d5ecfc}.volume-row header small,.textbook-mini .book-position small{color:#9bbdd6}
+.chapter-stop{background:#0d2844;border-color:#294966}.chapter-stop.current{background:linear-gradient(150deg,#104c7b,#102d4e);border-color:#408fc0}
+.chapter-stop .unit-label{color:#9bbbd5}.chapter-stop button{color:#bdd9ed}.chapter-stop button.current{color:#96edff}.chapter-stop button:hover{color:#fff;text-decoration:underline}.chapter-stop .no-mapping{color:#8ba6be}
+.track-arrow{color:#78c0df}.catalog-track{scrollbar-color:#305370 transparent}
+.textbook-mini .button{background:linear-gradient(125deg,#143c60,#102d49);border:1px solid #295373;color:#d7efff}
+.book-meta .book-edition{color:#9dbdd5}.cover-link{background:#122c46;border-color:#315572;box-shadow:0 5px 12px #0004}
+.cover-fallback{background:linear-gradient(135deg,#174367,#0a2440);color:#d0edff;border-left-color:#4cc7ef}.cover-fallback i{color:#8ab7d4}
+.cover-credit{color:#9bbad1}.cover-credit:hover{color:#84e8ff}.cover-link:hover{box-shadow:0 3px 16px #27b5f838}
+.loading-screen{background:radial-gradient(ellipse at center,#0b2e4d,var(--page) 65%)}.loading-screen p,.loading-inline{color:#a7c7de}.loader-orbit{border-color:#254d6f;border-top-color:#6bdcf9}
+dialog{background:linear-gradient(135deg,#102943,#08182d);color:var(--ink);border-color:#376487;box-shadow:0 25px 100px #0009}
+dialog::backdrop{background:#020b17b3;backdrop-filter:blur(5px)}
+.dialog-description,.known-summary{color:#aecce3}.icon-button{color:#b9d8f0}.path-step{border-color:#294761}.path-step .step-number{background:#18416a;color:#c2ebff}.path-step .step-name{color:#e0f4ff}.path-step small{color:#a3bfd7}.path-step .known-step{color:#80def8}
+.dialog-bottom{background:#0a2039;border-color:#2c4c67;color:#99b6cf}.toast{background:#123957;border:1px solid #396383;color:#e8f8ff}
+.network-list .related-link{background:#0c233c}
+/* Dataset landing: typography and real graph links replace the empty circles. */
+.about-page{background:radial-gradient(ellipse at 82% 3%,#102653 0,transparent 36%),#061326}
+.about-hero{max-width:1500px;margin:auto;padding:60px 48px 48px;min-height:670px;display:grid;grid-template-columns:.94fr 1.12fr;align-items:center;gap:12px;isolation:isolate;overflow:hidden;background:var(--cosmic-grid);background-size:32px 32px}
+.about-hero:after{inset:0;width:auto;height:auto;border:0;border-radius:0;box-shadow:none;background:url('assets/cosmic-nebula.svg') 75% 50%/100% 100% no-repeat;opacity:.5;z-index:-2}
+.about-hero:before{content:"";position:absolute;inset:0;background:url('assets/cosmic-stars.svg') center/1200px 870px;opacity:.5;z-index:-1;pointer-events:none;mask-image:linear-gradient(90deg,#0002,#000)}
+.hero-copy{padding-right:15px}.hero-copy .eyebrow{font-size:10px;line-height:1.8;letter-spacing:2px;color:#a9dced}
+.about-hero .hero-copy h1{font-size:clamp(54px,5.7vw,84px);letter-spacing:-4px;line-height:1.1;color:#f5faff;font-weight:760;margin:28px 0 18px}
+.about-hero .hero-copy h1 span{color:#ffaf63}.hero-copy h2{font-size:clamp(26px,2.7vw,39px);line-height:1.45;letter-spacing:-1px;font-weight:650}
+.hero-copy>p{font-size:14px;color:#acc8df;line-height:2;margin-top:23px;max-width:480px}
+.hero-actions{gap:14px;margin:29px 0 30px;flex-wrap:wrap}.hero-actions .button{font-size:13px;min-height:44px;padding:12px 18px}
+.hero-stats{display:flex;gap:12px;max-width:480px}.hero-stats>div{flex:1;min-width:0;background:linear-gradient(145deg,#173c6080,#0d274380);border:1px solid #345976;border-radius:10px;padding:15px 16px;box-shadow:inset 0 1px #8dc6e61c}
+.hero-stats strong{font-size:27px;color:#eefaff;font-variant-numeric:tabular-nums;display:block}.hero-stats span{font-size:8px;color:#b5d3e9;letter-spacing:.8px;display:block;margin-top:7px;white-space:nowrap}
+.hero-visual{min-width:0;align-self:center}.hero-network svg{width:100%;height:auto;overflow:visible}.hero-network-caption{text-align:center;font-size:10px;letter-spacing:.5px;color:#93bdd8;margin:8px 0 0}
+.hero-edge{fill:none;stroke:#66c8e7;stroke-width:1.5;opacity:.85}.hero-edge.topic{stroke:#b29bd2;stroke-dasharray:4 5;opacity:.35}.hero-resource-edge{fill:none;stroke:#d6b37b;stroke-width:1.5;opacity:.85}
+.hero-node circle{transition:filter .2s,stroke-width .2s}.hero-node:hover circle,.hero-node:focus-visible circle{filter:drop-shadow(0 0 8px #61e9ff88);stroke-width:2.5}
+.hero-node text{font-size:14px;fill:#e5f4ff;paint-order:stroke;stroke:#091c34;stroke-width:3;stroke-linejoin:round}.hero-node.focus text{font-size:24px;font-weight:650;stroke:none}.hero-node.small text{font-size:12px}
+.hero-resource rect{fill:#102e4a;stroke:#60849f;stroke-width:1}.hero-resource text{fill:#dcedfa}.hero-resource .resource-title{font-size:17px;font-weight:600}.hero-resource .resource-subtitle{font-size:11px;fill:#a5c8df;letter-spacing:.5px}.hero-resource.standard rect{fill:#2c2d35;stroke:#bba178}.hero-resource.standard .resource-subtitle{fill:#e2c49b}
+.hero-resource:hover rect,.hero-resource:focus-visible rect{stroke:#b7f0ff;stroke-width:1.8}.hero-resource path{fill:none;stroke:#a6d9f3;stroke-width:1.5}.hero-resource.standard path{stroke:#edc98f}
+.hero-legend{font-size:10px;fill:#98bbd6}.hero-node-topic-label{fill:#c3afd8!important}
+.about-stats{max-width:1320px;margin:0 auto 45px;padding:30px 12px;border-color:#23415f}.about-stats>div{border-color:#294761}.about-stats strong{color:#cdeeff;font-size:29px}.about-stats span{color:#98b7d1}
+.about-section{max-width:1380px;padding:25px 42px 48px}.section-heading h2{color:#eef8ff}.section-heading p{color:#a8c2d9}
+.about-section figure{background:#0d2239;border-color:#2d4b67;padding:12px;border-radius:12px;box-shadow:0 14px 40px #0003}.about-section img{background:#fff;border-radius:6px}.about-section figcaption{color:#a6c4dc;padding:14px 8px 5px}
+.about-bottom{max-width:1296px;margin:25px auto 70px;padding-top:38px;border-color:#2a4863;gap:70px}.about-bottom p{color:#afcadf}.download-card{background:linear-gradient(135deg,#153755,#0c203a);border-color:#315676}.download-card>a:not(.button){color:#a6d7ef}.about-footer{border-color:#203e59;color:#9dbcd5}.about-footer a:hover{color:#8ceaff}
+@keyframes cosmic-drift{from{transform:translate3d(-.6%,-.5%,0)}to{transform:translate3d(.7%,.6%,0)}}
+@media(min-width:1650px){.about-hero{padding-top:74px;padding-bottom:62px;min-height:730px}}
+@media(max-width:1200px){.github-link{display:none}.about-hero{padding:45px 30px;min-height:620px}.hero-copy .eyebrow{font-size:8px;letter-spacing:1.4px}.hero-copy>p{font-size:13px}.hero-stats>div{padding:13px 10px}.hero-stats strong{font-size:24px}.hero-stats span{font-size:7px}.about-bottom{margin-left:40px;margin-right:40px}}
+@media(max-width:950px){.about-hero{grid-template-columns:1fr;gap:20px;padding:50px 40px 32px;min-height:0}.hero-copy{padding:0;max-width:620px;margin:auto;width:100%}.hero-copy h2 br{display:none}.about-hero .hero-copy h1{font-size:67px}.hero-copy h2{font-size:33px}.hero-copy>p{font-size:14px}.hero-visual{width:min(100%,650px);margin:auto}.hero-copy .eyebrow{font-size:10px}.hero-stats span{font-size:8px}.about-stats{margin:0 30px 30px}.about-bottom{gap:30px}.hero-stats{max-width:520px}}
+@media(max-width:620px){.graph-panel{background-size:auto,22px 22px,22px 22px}.network-stage:before{opacity:.55}.network-stage:after{opacity:.5;background-size:760px 550px;animation:none}.about-hero{padding:35px 21px 27px;gap:22px}.about-hero .hero-copy h1{font-size:56px;letter-spacing:-2.5px;margin:22px 0 14px}.hero-copy h2{font-size:27px;letter-spacing:-.8px}.hero-copy h2 br{display:block}.hero-copy .eyebrow{font-size:7px;letter-spacing:1.5px}.hero-copy>p{font-size:12px;margin-top:17px}.hero-actions{margin:22px 0;gap:10px}.hero-actions .button{font-size:11px;min-height:40px;padding:10px 12px}.hero-stats{gap:9px}.hero-stats>div{padding:12px 10px}.hero-stats strong{font-size:23px}.hero-stats span{font-size:6px;letter-spacing:.4px}.hero-visual{width:100%}.hero-network-caption{font-size:9px}.about-stats{margin:0 22px 28px;padding:24px 0}.about-stats strong{font-size:23px}.about-section{padding:18px 18px 28px}.about-section figure{padding:7px}.about-section figcaption{font-size:9px;padding:10px 4px 2px}.about-bottom{margin:12px 22px 40px}.about-footer{line-height:1.8}.desktop-break{display:none}}
+@media(prefers-reduced-motion:reduce){.network-stage:after{animation:none}html{scroll-behavior:auto}.hero-node circle{transition:none}}
