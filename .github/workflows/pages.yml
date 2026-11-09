@@ -41,3 +41,11 @@ jobs:
       - name: Publish the same gh-pages build
         id: deployment
         uses: actions/deploy-pages@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Verify the live public site and full dataset download
+        timeout-minutes: 8
+        run: node scripts/verify-deployment.mjs
