@@ -1,0 +1,8 @@
+dist/
+data/open/
+.preview/
+node_modules/
+.env
+.env.*
+*.log
+.DS_Store

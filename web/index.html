@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>EduGraph — Explore connected knowledge</title>
+  <meta name="description" content="Explore EduGraph: shared K–12 concepts, prerequisites, curriculum standards, textbook views, explanations and exercises.">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#/explore" aria-label="EduGraph 首页"><svg viewBox="0 0 36 36" aria-hidden="true"><path d="M8 24L18 8L29 23L8 24M18 8V29"/><circle cx="8" cy="24" r="4"/><circle cx="18" cy="8" r="4"/><circle cx="29" cy="23" r="4"/><circle cx="18" cy="29" r="3"/></svg><span>EduGraph<span class="brand-light"> Explorer</span></span></a>
+    <nav aria-label="主导航"><a id="nav-explore" href="#/explore" class="nav-link active">知识探索</a><a id="nav-about" href="#/about" class="nav-link">关于数据集</a></nav>
+    <div class="header-end"><span class="release-pill"><i></i> Open knowledge</span><a id="download-top" class="button quiet compact" href="#/about">下载数据 <span aria-hidden="true">↗</span></a></div>
+  </header>
+  <div id="loading" class="loading-screen"><div class="loader-orbit"></div><h1>正在连接知识…</h1><p id="loading-text">加载 EduGraph 公开数据与检索索引</p></div>
+  <main id="explorer" class="workspace" hidden>
+    <aside class="search-panel" aria-label="检索与知识导航">
+      <div class="search-top"><div class="eyebrow">EXPLORE THE GRAPH</div><h1>从一个知识点开始<span class="teal-dot">.</span></h1>
+        <label class="search-box"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="search" type="search" placeholder="搜索知识点、主题或别名" aria-label="搜索知识点、主题或别名" autocomplete="off"><kbd>/</kbd></label>
+        <div class="filter-row"><select id="subject" aria-label="学科筛选"><option value="">全部学科</option></select><select id="stage" aria-label="学段筛选"><option value="">全部学段</option><option value="primary">小学</option><option value="junior">初中</option><option value="senior">高中</option></select></div>
+        <div class="sidebar-tabs" role="tablist"><button id="browse-results" class="active" role="tab" aria-selected="true">知识列表</button><button id="browse-tree" role="tab" aria-selected="false">层级导航</button><span id="result-count"></span></div>
+      </div>
+      <div id="result-list" class="result-list" aria-live="polite"></div>
+      <div class="sidebar-foot"><span class="live-dot"></span><span id="sidebar-stat">5,269 concepts · 10 subjects</span></div>
+    </aside>
+    <section class="graph-panel" aria-label="知识图谱">
+      <div class="graph-top"><div><div class="eyebrow">KNOWLEDGE IN CONTEXT</div><h2 id="graph-title">知识关系</h2></div><div class="view-switch" role="tablist"><button id="view-network" class="active" role="tab" aria-selected="true">关系图谱</button><button id="view-textbooks" role="tab" aria-selected="false">教材编排</button></div></div>
+      <div id="graph-controls" class="graph-controls"><div class="segmented" aria-label="关系方向"><button class="active" data-direction="both" aria-pressed="true">全部关系</button><button data-direction="prerequisites" aria-pressed="false">前置知识</button><button data-direction="successors" aria-pressed="false">后继知识</button></div><label class="depth-control">展开 <select id="depth" aria-label="关系跳数"><option value="1">1 跳</option><option value="2" selected>2 跳</option><option value="3">3 跳</option></select></label></div>
+      <div id="network-stage" class="network-stage"><svg id="network" role="img" aria-label="可交互知识关系图"></svg><div id="graph-tooltip" class="graph-tooltip" hidden></div><div class="canvas-tools"><button id="zoom-in" title="放大" aria-label="放大">+</button><button id="zoom-out" title="缩小" aria-label="缩小">−</button><button id="zoom-fit" title="适应画布" aria-label="适应画布">⤢</button></div><div id="graph-status" class="graph-status"></div><div class="canvas-hint">拖动节点 · 滚轮缩放 · 点击探索</div></div>
+      <div id="textbook-stage" class="textbook-stage" hidden></div>
+      <div id="graph-legend" class="graph-legend"><span><i class="legend-dot focus"></i>当前知识点</span><span><i class="legend-dot prerequisite"></i>前置</span><span><i class="legend-dot successor"></i>后继</span><span><i class="legend-dot topic"></i>所属主题</span><span class="edge-key">实线 → 先修 · 虚线 → 从属</span></div>
+      <div class="graph-footer"><div><span class="eyebrow">YOUR LEARNING PATH</span><p>选一个目标，查看需要哪些前置知识。</p></div><button id="open-path" class="button primary">探索学习路径 <span>↗</span></button></div>
+    </section>
+    <aside class="detail-panel" aria-label="知识点详情"><div id="detail-heading" class="detail-heading"></div><div id="detail-tabs" class="detail-tabs" role="tablist"><button class="active" data-tab="keypoints" role="tab" aria-selected="true">讲解</button><button data-tab="exercises" role="tab" aria-selected="false">例题</button><button data-tab="textbooks" role="tab" aria-selected="false">教材</button><button data-tab="standards" role="tab" aria-selected="false">课标</button></div><div id="detail-content" class="detail-content" aria-live="polite"></div><div class="detail-foot"><button id="copy-link" class="text-button">复制知识点链接 ↗</button><button id="export-node" class="text-button">导出 JSON ↓</button></div></aside>
+  </main>
+  <main id="about" class="about-page" hidden>
+    <section class="about-hero"><div class="eyebrow">EDUCATION AGENT DATA INFRASTRUCTURE</div><h1>知识相连，<br>学习有迹可循<span>.</span></h1><p>EduGraph 将课程标准、知识点、先修关系、教材视图、讲解与习题组织在同一数据底座中，让教育应用可以检索知识、理解关联，并构建持续的教学流程。</p><div class="hero-actions"><a href="#/explore" class="button primary">进入知识图谱 ↗</a><a id="download-about" class="button secondary" download>下载公开数据 ↓</a></div><div class="hero-annotation">共享知识 · 多教材视图 · 可追溯关联</div></section>
+    <div id="about-stats" class="about-stats"></div>
+    <section class="about-section"><div class="section-heading"><div><div class="eyebrow">01 / CONNECTED STRUCTURE</div><h2>同一套知识，多种教材视角</h2></div><p>课程要求连接共享 Concept；不同出版社保留独立的编排顺序。</p></div><figure><img src="assets/figure-2.png" loading="lazy" alt="课标、共享知识网络与不同教材视图之间的关系"><figcaption>Figure 2 · Standards, shared concepts and textbook views.</figcaption></figure></section>
+    <section class="about-section"><div class="section-heading"><div><div class="eyebrow">02 / DATA LANDSCAPE</div><h2>从知识全景，到跨学段路径</h2></div><p>涵盖十个学科，连接小学、初中与高中阶段的知识和教学资源。</p></div><figure><img src="assets/figure-3.png" loading="lazy" alt="新版 Figure 3：学科知识全景、跨学段先修链、资源覆盖及分层精度"><figcaption>Figure 3 · Concept landscape, a cross-stage prerequisite chain, coverage, and precision by layer. 图示采用论文提供的版本。</figcaption></figure></section>
+    <section class="about-bottom"><div><div class="eyebrow">OPEN & TRACEABLE</div><h2>浏览、下载、构建你的应用</h2><p>页面中的关系来自公开数据。教材视图展示章节顺位及关联知识点，未包含原书章节标题与印刷编号。学习路径由先修关系生成；已掌握标记只保存在当前浏览器。</p><p>讲解、题目及映射保留原始审核状态，可在详情中查看。</p></div><div class="download-card"><strong>EduGraph public release</strong><p id="download-description"></p><a id="download-card" class="button primary" download>下载完整公开包 ↓</a><a href="LICENSE-DATA" target="_blank">数据许可 · CC BY-SA 4.0 ↗</a><a href="LICENSE" target="_blank">代码许可 · Apache 2.0 ↗</a><a id="checksum-link" download>SHA-256 校验文件 ↓</a></div></section>
+    <footer class="about-footer"><span>EduGraph · Connected knowledge for education agents</span><a href="#/explore">返回探索 ↗</a></footer>
+  </main>
+  <dialog id="path-dialog"><div class="dialog-header"><div><div class="eyebrow">PREREQUISITE-BASED PLANNING</div><h2 id="path-title">学习路径</h2></div><button id="close-path" class="icon-button" aria-label="关闭学习路径">×</button></div><p id="path-description" class="dialog-description"></p><div id="known-summary" class="known-summary"></div><div id="path-content" class="path-content"></div><div class="dialog-bottom"><span>先修约束下的一条可行顺序；教材编排可单独查看。</span><button id="clear-known" class="text-button">清空已掌握标记</button></div></dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <noscript>请启用 JavaScript，以浏览、检索和展开 EduGraph 数据。</noscript>
+  <script type="module" src="app.mjs"></script>
+</body></html>
