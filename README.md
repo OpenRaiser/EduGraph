@@ -287,13 +287,7 @@ npm run audit:site  # 检查可发布文件、来源记录和完整数据包
 使用公开数据时，请标注 **EduGraph、所用数据版本和数据许可**。下面是仓库资源的 BibTeX 引用，方便在研究或项目说明中使用：
 
 ```bibtex
-@misc{edugraph2026,
-  title        = {{EduGraph}: Connected Knowledge for Education Agents},
-  year         = {2026},
-  howpublished = {GitHub repository},
-  url          = {https://github.com/OpenRaiser/EduGraph},
-  note         = {Public data release v0.21.0}
-}
+TBD
 ```
 
 <a id="license"></a>
