@@ -2,6 +2,7 @@ import {createModel,findNodes,neighborhood,degree,orderChapters,statusLabel,SUBJ
 import {NetworkView} from './network.mjs';
 import {resolveCover} from './covers.mjs';
 import {renderHero} from './hero.mjs';
+import {groupTextbooks,catalogForGroup,editionLabel,sourceUrl} from './textbook-views.mjs';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num=n=>Number(n??0).toLocaleString('en-US');
@@ -10,6 +11,7 @@ let model,manifest,download,currentResources=null,standardsPromise=null;
 let coverCatalog=null,coverPromise=null;
 let heroLoaded=false;
 const resourceCache=new Map();
+const selectedCatalogs=new Map();
 let known=new Set();
 try{const saved=JSON.parse(localStorage.getItem('edugraph.known.v1')||'[]');if(Array.isArray(saved))known=new Set(saved.filter(x=>typeof x==='string'));}catch{}
 const network=new NetworkView($('#network'),key=>navigate(key),$('#graph-tooltip'));
@@ -54,13 +56,13 @@ function renderHeading(){
   const n=model.byKey.get(state.key);if(!n)return;
   const pre=model.graph.prerequisites.get(n.key)?.length??0,post=model.graph.successors.get(n.key)?.length??0;
   const breadcrumbs=[];let k=model.graph.parent.get(n.key);while(k&&breadcrumbs.length<8){const p=model.byKey.get(k);if(!p)break;breadcrumbs.unshift(nodeLink(k,p.name));k=model.graph.parent.get(k);}
-  const r=entry(n),books=currentResources?new Set(r.teaches.map(t=>currentResources.chapters.find(c=>c.chapter_id===t.from)?.textbook_id)).size:'—';
+  const books=currentResources?booksForConcept().length:'—';
   $('#detail-heading').innerHTML=`<div class="meta-top"><span class="small-tag">${n.node_kind==='topic'?'TOPIC':'CONCEPT'} / ${esc(SUBJECTS[n.subject])}</span><span>${esc(STAGES[n.stage])}</span></div><h2>${esc(n.name)}</h2><div class="breadcrumb">${breadcrumbs.join(' <span>›</span> ')||esc(SUBJECTS[n.subject])}</div><div class="node-tags"><span class="tag">${esc(STAGES[n.stage])}</span>${n.grade_band?`<span class="tag">${esc(n.grade_band)} 年级</span>`:''}<span class="tag">${esc(statusLabel(n.review_status))}</span>${n.node_kind!=='topic'?`<button id="mark-known" class="known-button ${known.has(n.key)?'active':''}">${known.has(n.key)?'✓ 已掌握':'＋ 已掌握'}</button>`:''}</div><div class="node-counts"><div><strong>${num(pre)}</strong><span>直接前置</span></div><div><strong>${num(post)}</strong><span>直接后继</span></div><div><strong>${books==='—'?books:num(books)}</strong><span>关联教材册次</span></div></div>`;
   if($('#mark-known'))$('#mark-known').onclick=()=>toggleKnown(n.key);
   $('#open-path').disabled=n.node_kind==='topic';$('#open-path').title=n.node_kind==='topic'?'请先选择一个具体知识点':'生成先修学习路径';
 }
 function renderTabCounts(){
-  const r=entry();const counts={keypoints:r.keypoints.length,exercises:r.exercises.length,textbooks:new Set(r.teaches.map(t=>currentResources.chapters.find(c=>c.chapter_id===t.from)?.textbook_id)).size,standards:r.standards.length};
+  const r=entry();const counts={keypoints:r.keypoints.length,exercises:r.exercises.length,textbooks:booksForConcept().length,standards:r.standards.length};
   for(const b of $$('#detail-tabs button')){const names={keypoints:'讲解',exercises:'例题',textbooks:'教材',standards:'课标'};b.innerHTML=`${names[b.dataset.tab]}<span class="tab-count">${counts[b.dataset.tab]}</span>`;}
 }
 function renderResults(){
@@ -115,7 +117,7 @@ async function renderDetail(){
     loadCovers();
     const books=booksForConcept();
     html='<div class="textbook-note">展示公开包中的册次、章节顺位与关联角色。顺位标签不等同于原书章节名称。</div>';
-    html+=books.map(({book,mappings})=>`<article class="resource-card textbook-mini"><div class="book-overview">${bookCover(book)}<div class="book-meta"><h3 class="publisher-name">${esc(book.publisher)}</h3><p>${esc(book.volume_label||`${book.grade} ${book.volume}`)}</p><p class="book-edition">目录版本 ${esc(book.edition)} · ${esc(SUBJECTS[book.subject])}</p></div></div>${mappings.map(({teach,chapter})=>`<div class="book-position"><span>单元顺位 ${esc(chapter.order)}</span><small>${roleName(teach.role)} · ${esc(statusLabel(teach.review_status))}</small></div>`).join('')}<button class="button" data-book="${esc(book.textbook_id)}">查看这一册的编排 →</button></article>`).join('');
+    html+=books.map(({book,mappings,sourceMappings,sources})=>`<article class="resource-card textbook-mini"><div class="book-overview">${bookCover(book)}<div class="book-meta"><h3 class="publisher-name">${esc(book.publisher)}</h3><p>${esc(book.volume_label||`${book.grade} ${book.volume}`)}</p><p class="book-edition">${esc(editionLabel(book))} · ${esc(SUBJECTS[book.subject])}</p></div></div>${mappings.map(({teach,chapter})=>`<div class="book-position"><span>章节顺位 ${esc(chapter.order)}</span><small>${roleName(teach.role)} · ${esc(statusLabel(teach.review_status))}${teach.uncertain?' · 待核':''}</small></div>`).join('')}${sources.length?`<p class="source-catalog-summary">另有 ${sources.length} 份 ChinaTextbook 来源目录${sourceMappings.length?` · ${sourceMappings.length} 条当前知识点候选关联`:''}</p>`:''}<button class="button" data-book="${esc(book.textbook_id)}">查看编排与来源目录 →</button></article>`).join('');
     if(!books.length)html+='<div class="empty-state">这个知识点尚无公开教材映射。</div>';
   }else if(state.tab==='standards'){
     $('#detail-content').innerHTML='<div class="loading-inline">正在读取课标条目…</div>';
@@ -128,19 +130,32 @@ async function renderDetail(){
 }
 function roleName(role){return({primary:'主讲',review:'复习',mentioned:'提及'})[role]??role;}
 function booksForConcept(){
-  if(!currentResources)return[];const chapterMap=new Map(currentResources.chapters.map(c=>[c.chapter_id,c])),bookMap=new Map(currentResources.textbooks.map(b=>[b.textbook_id,b]));const groups=new Map();
-  for(const t of entry().teaches){const chapter=chapterMap.get(t.from);if(!chapter)continue;const book=bookMap.get(chapter.textbook_id);if(!book)continue;if(!groups.has(book.textbook_id))groups.set(book.textbook_id,{book,mappings:[]});groups.get(book.textbook_id).mappings.push({teach:t,chapter});}
-  const priority=b=>b.publisher.includes('人民教育')?0:b.publisher.includes('北京师范')?1:2;
-  return[...groups.values()].sort((a,b)=>priority(a.book)-priority(b.book)||a.book.publisher.localeCompare(b.book.publisher,'zh')||Number(a.book.grade?.replace(/\D/g,''))-Number(b.book.grade?.replace(/\D/g,''))||String(a.book.volume).localeCompare(String(b.book.volume)));
+  return groupTextbooks(currentResources,entry());
+}
+function catalogSelector(group,selected){
+  if(!group.sources.length)return'';
+  const active=selected.source?.source_id??'canonical';
+  return`<div class="catalog-selector"><label>查看目录<select data-catalog-book="${esc(group.book.textbook_id)}" aria-label="${esc(group.book.publisher+' '+(group.book.volume_label??group.book.volume))}的目录来源"><option value="canonical" ${active==='canonical'?'selected':''}>EduGraph 主图目录</option>${group.sources.map((s,i)=>`<option value="${esc(s.source_id)}" ${active===s.source_id?'selected':''}>ChinaTextbook ${group.sources.length>1?`${i+1} · `:''}${esc(s.textbook.edition?`${s.textbook.edition} 年版`:'版次未确认')} · ${s.chapters.length?'目录候选':'目录待恢复'}</option>`).join('')}</select></label><span>各来源分别保留编排顺序</span></div>`;
+}
+function catalogTrack(selected){
+  const chapters=orderChapters(selected.chapters,selected.book.textbook_id);
+  if(!chapters.length)return'<div class="catalog-empty">此来源已关联到教材系列，但尚未恢复可用目录；不代表教材没有内容。</div>';
+  return`<div class="catalog-track">${chapters.map((c,i)=>{
+    const concepts=selected.chapterConcepts[c.chapter_id]??[],isCurrent=concepts.some(x=>model.nodes[x.id]?.key===state.key);
+    return`${i?'<span class="track-arrow" aria-hidden="true">→</span>':''}<div class="chapter-stop ${isCurrent?'current':''}"><div class="unit-label">${c.level===1?'单元':'章节'}顺位 ${esc(c.orderPath.join('.'))}${c.uncertain?' · 待核':''}</div>${concepts.length?concepts.map(x=>{const n=model.nodes[x.id];if(!n)return'';return`<button data-key="${esc(n.key)}" class="${n.key===state.key?'current':''}" title="${esc(n.name)} · ${roleName(x.role)}${x.uncertain?' · 待核':''}">${esc(n.name)}${x.role==='review'?' · 复习':''}</button>`;}).join(''):'<span class="no-mapping">未关联 Concept</span>'}</div>`;
+  }).join('')}</div>`;
 }
 function renderTextbookView(){
   if(!currentResources){$('#textbook-stage').innerHTML='<div class="loading-inline">正在加载教材视图…</div>';return;}
   loadCovers();
   const books=booksForConcept(),publishers=new Map();for(const b of books){if(!publishers.has(b.book.publisher))publishers.set(b.book.publisher,[]);publishers.get(b.book.publisher).push(b);}
-  let html='<div class="textbook-note">同一个 Concept，在不同教材中有不同的教学位置。轨道按本册章节顺位排列，蓝色标记当前知识点。<strong>箭头表示教材编排顺序。</strong><br>参考封面来自 <a href="https://github.com/TapXWorld/ChinaTextbook" target="_blank" rel="noopener noreferrer">ChinaTextbook</a>，按出版社、系列与册次匹配；不同印次的封面可能不同。</div>';
+  let html='<div class="textbook-note">同一个 Concept，在不同教材中有不同的教学位置。轨道按本册章节顺位排列，蓝色标记当前知识点。<strong>箭头表示教材编排顺序。</strong><br>有来源目录的教材可切换查看；来源视图按系列与册次关联，不另计为新增教材。参考封面来自 <a href="https://github.com/TapXWorld/ChinaTextbook" target="_blank" rel="noopener noreferrer">ChinaTextbook</a>，不同印次的封面可能不同。</div>';
   for(const [publisher,group]of publishers){html+=`<section class="publisher-group"><div class="publisher-header"><span class="book-symbol">书</span><div><h3>${esc(publisher)}</h3><small>${group.length} 册关联教材 · 教材视图</small></div></div>`;
-    for(const{book}of group){const chapters=orderChapters(currentResources.chapters,book.textbook_id);html+=`<div class="volume-row" data-volume="${esc(book.textbook_id)}"><header>${bookCover(book)}<div class="volume-heading"><strong>${esc(book.volume_label||book.volume)}</strong><small>目录版本 ${esc(book.edition)} · ${esc(statusLabel(book.review_status))}</small></div></header><div class="catalog-track">`;
-      html+=chapters.map((c,i)=>{const concepts=currentResources.chapterConcepts[c.chapter_id]??[];const isCurrent=concepts.some(x=>model.nodes[x.id]?.key===state.key);return`${i?'<span class="track-arrow" aria-hidden="true">→</span>':''}<div class="chapter-stop ${isCurrent?'current':''}"><div class="unit-label">${c.level===1?'单元':'章节'}顺位 ${esc(c.orderPath.join('.'))}</div>${concepts.length?concepts.map(x=>{const n=model.nodes[x.id];return`<button data-key="${esc(n.key)}" class="${n.key===state.key?'current':''}" title="${esc(n.name)} · ${roleName(x.role)}">${esc(n.name)}${x.role==='review'?' · 复习':''}</button>`;}).join(''):'<span class="no-mapping">未关联 Concept</span>'}</div>`;}).join('');html+='</div></div>';}
+    for(const item of group){const{book}=item,selected=catalogForGroup(currentResources,item,selectedCatalogs.get(book.textbook_id)),url=sourceUrl(selected.source);
+      html+=`<div class="volume-row" data-volume="${esc(book.textbook_id)}"><header>${bookCover(book)}<div class="volume-heading"><strong>${esc(book.volume_label||book.volume)}</strong><small>${esc(editionLabel(book))} · ${esc(statusLabel(book.review_status))}</small></div></header>${catalogSelector(item,selected)}`;
+      if(selected.source)html+=`<div class="source-catalog-note"><strong>ChinaTextbook 来源目录 · 待核候选</strong><span>${esc(editionLabel(selected.book))}。按教材系列与册次关联，未认定为主图记录的同一出版版次。</span>${url?`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">查看教材来源 ↗</a>`:''}</div>`;
+      html+=catalogTrack(selected)+'</div>';
+    }
     html+='</section>';
   }
   if(!books.length)html+='<div class="empty-state"><strong>暂无教材映射</strong>可以从其他知识点探索教材编排。</div>';
@@ -171,6 +186,7 @@ async function loadHeroResources(){
   try{const data=await resources(model.byKey.get(manifest.defaultKey));renderHero($('#hero-network'),model,data);heroLoaded=true;}catch{/* Keep the graph and links usable if resource loading needs a retry. */}
 }
 function bind(){
+  document.addEventListener('change',event=>{const selector=event.target.closest?.('[data-catalog-book]');if(!selector)return;selectedCatalogs.set(selector.dataset.catalogBook,selector.value);renderTextbookView();});
   document.addEventListener('error',event=>{if(event.target instanceof HTMLImageElement&&event.target.classList.contains('textbook-cover')){event.target.hidden=true;event.target.closest('.cover-wrap')?.classList.add('cover-unavailable');}},true);
   let searchTimer;$('#search').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>{state.resultLimit=60;if(state.browse==='tree')setBrowse('results');else renderResults();},120);});
   for(const select of ['#subject','#stage'])$(select).onchange=()=>{state.resultLimit=60;renderResults();};

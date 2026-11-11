@@ -24,6 +24,8 @@ async function get(resource){
 const json=async resource=>JSON.parse((await get(resource)).toString('utf8'));
 const html=(await get('')).toString('utf8');assert.match(html,/EduGraph/);assert.match(html,/learning\.css/);assert.match(html,/id="hero-network"/);
 const manifest=await json('data/manifest.json');
+const configured=JSON.parse(await readFile(new URL('../data/release.json',import.meta.url),'utf8'));
+assert.equal(manifest.version,configured.version,'The site is serving an older data release');
 assert.equal(manifest.counts.knowledge_points,5269);
 assert.equal(manifest.counts.topic_nodes,1322);
 assert.equal(manifest.scopes.length,24);
@@ -40,7 +42,7 @@ for(const scope of manifest.scopes){
   const shard=await json(`data/resources/${scope.subject}/${scope.stage}.json`);
   assert.ok(shard.concepts&&Array.isArray(shard.textbooks)&&Array.isArray(shard.chapters));
 }
-for(const file of ['app.mjs','model.mjs','network.mjs','covers.mjs','hero.mjs','styles.css','learning.css','core/graph.mjs','core/bm25.mjs','core/tokenize.mjs','assets/figure-2.png','assets/figure-3.png','assets/covers/catalog.json','assets/covers/NOTICE.txt']){
+for(const file of ['app.mjs','model.mjs','network.mjs','covers.mjs','hero.mjs','textbook-views.mjs','styles.css','learning.css','core/graph.mjs','core/bm25.mjs','core/tokenize.mjs','assets/figure-2.png','assets/figure-3.png','assets/covers/catalog.json','assets/covers/NOTICE.txt']){
   const deployed=await get(file),source=await readFile(new URL('../web/'+file,import.meta.url));
   assert.equal(createHash('sha256').update(deployed).digest('hex'),createHash('sha256').update(source).digest('hex'),`${file}: deployed content differs from source`);
 }

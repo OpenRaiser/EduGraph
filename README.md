@@ -23,7 +23,7 @@
 
 <p>
   <a href="https://openraiser.github.io/EduGraph/"><b>🌐 在线探索</b></a> ·
-  <a href="https://openraiser.github.io/EduGraph/downloads/edugraph-v0.21.0.tar.gz"><b>📦 下载数据</b></a> ·
+  <a href="https://openraiser.github.io/EduGraph/downloads/edugraph-v0.24.0.tar.gz"><b>📦 下载数据</b></a> ·
   <a href="#features"><b>✨ 核心能力</b></a> ·
   <a href="#integration"><b>🔌 接入应用</b></a> ·
   <a href="#quickstart"><b>🚀 本地运行</b></a>
@@ -128,7 +128,7 @@ EduGraph 以共享的 Concept 标识连接课程要求、先修关系和教学�
 
 ## 📊 数据概览
 
-覆盖 **10 个学科、3 个学段**，连接知识结构与教学资源。以下为公开数据包的精确计数。
+覆盖 **10 个学科、3 个学段**，连接知识结构与教学资源。以下为 **v0.24.0 主图**的精确计数；独立来源目录视图另列，不重复计入教材总量。
 
 **学科**：数学、语文、英语、物理、化学、生物、历史、地理、道德与法治、科学。**学段**：小学、初中、高中；按实际课程设置组织为 24 个学科—学段分区。
 
@@ -137,21 +137,34 @@ EduGraph 以共享的 Concept 标识连接课程要求、先修关系和教学�
 | Concept · 知识点 | **5,269** | KeyPoint · 讲解要点 | **11,765** |
 | Topic · 主题 | **1,322** | Exercise · 习题 | **7,107** |
 | PREREQUISITE · 先修关系 | **4,882** | StandardItem · 课标条目 | **2,844** |
-| REFINES · 分类层级 | **6,417** | Textbook · 教材册次 | **752** |
-| COVERS · 课标关联 | **7,694** | Chapter · 教材章节 | **6,878** |
-| TEACHES · 教材关联 | **21,971** | Subject / Stage · 学科 / 学段 | **10 / 3** |
+| REFINES · 分类层级 | **6,417** | Textbook · 教材册次 | **1,113** |
+| COVERS · 课标关联 | **7,694** | Chapter · 教材章节 | **10,926** |
+| TEACHES · 教材关联 | **23,015** | Subject / Stage · 学科 / 学段 | **10 / 3** |
+
+### 📚 教材范围扩充
+
+本次发布接入 ChinaTextbook 中已有十学科的主教材来源。相较于此前公开的 v0.21.0，主图增加 **361 册教材、4,048 个目录节点和 1,044 条 TEACHES**；Concept、Topic、先修关系、讲解、习题与课标保持不变。
+
+- **980 份主教材来源完成范围匹配**：结合学科、学制、系列或主编、年级和册次识别教材；957 份对应单一主图记录，23 份对应同系列多个年份记录。活动手册、读本等 72 份补充材料暂未纳入本轮。
+- **619 份独立来源视图**：已覆盖的教材保留其主图记录，ChinaTextbook 中不同来源的目录分别保存。这里含 **4,451 个目录节点、359 条候选 TEACHES**，通过辅助索引连接已有教材，不因 PDF 或年份差异重复计算教材册数。
+- **审核状态可追溯**：619 份独立视图中，391 份恢复了目录候选，228 份尚无可用目录；范围匹配不代表目录完整。本轮目录深化和独立来源匹配的新映射标记为 `draft` / `uncertain`，先前批次保留各自的审核状态。
+
+[查看来源视图与索引 →](data/source-views-v0.24.0/) · [字段与统计口径 →](DATA_CARD.md)
 
 <p align="center">
   <img src="web/assets/figure-3.png" alt="Concept landscape, a cross-stage prerequisite chain, coverage and precision by layer" width="1100" />
+  <br><sub>论文中的数据分析快照：教材与覆盖率数字对应扩充前的数据；当前公开规模以上表和 manifest 为准。</sub>
 </p>
 
-📥 **[下载完整数据包](https://openraiser.github.io/EduGraph/downloads/edugraph-v0.21.0.tar.gz)** · [SHA-256 校验](https://openraiser.github.io/EduGraph/downloads/edugraph-v0.21.0.tar.gz.sha256) · [Data Card](DATA_CARD.md)
+📥 **[下载完整数据包](https://openraiser.github.io/EduGraph/downloads/edugraph-v0.24.0.tar.gz)** · [SHA-256 校验](https://openraiser.github.io/EduGraph/downloads/edugraph-v0.24.0.tar.gz.sha256) · [Data Card](DATA_CARD.md)
+
+下载包同时包含 `v0.24.0/` 主图和 `source-views-v0.24.0/` 独立来源视图。两层共享知识点，且教材范围重叠，**不能直接相加作为数据集规模**。
 
 <a id="quickstart"></a>
 
 ## 🚀 本地运行
 
-只想浏览，直接打开 [在线 Explorer](https://openraiser.github.io/EduGraph/)；只需数据，直接 [下载公开包](https://openraiser.github.io/EduGraph/downloads/edugraph-v0.21.0.tar.gz)。开发或自部署可使用以下步骤。
+只想浏览，直接打开 [在线 Explorer](https://openraiser.github.io/EduGraph/)；只需数据，直接 [下载公开包](https://openraiser.github.io/EduGraph/downloads/edugraph-v0.24.0.tar.gz)。开发或自部署可使用以下步骤。
 
 需要 **Node.js ≥ 20.11** 和 `tar`。网页与构建工具无需安装 npm 依赖。
 
@@ -217,9 +230,15 @@ console.log(JSON.stringify(context, null, 2));
 
 ```text
 data/
-  edugraph-v0.21.0.tar.gz      完整公开数据及数据说明
-  edugraph-v0.21.0.tar.gz.sha256
-  open/v0.21.0/              构建时解压，Git 忽略
+  edugraph-v0.24.0.tar.gz      主图、来源视图及数据说明
+  edugraph-v0.24.0.tar.gz.sha256
+  source-views-v0.24.0/       独立来源的结构数据与教材关联索引
+    textbooks.jsonl         来源视图的教材元数据
+    chapters.jsonl          各来源自己的目录层级与顺序
+    teaches.jsonl           目录到已有 Concept 的候选关联
+    source-links.jsonl      来源视图与主图教材的对应关系
+    index.json              视图规模、范围说明与校验信息
+  open/v0.24.0/              构建时解压，Git 忽略
     knowledge-points/       Concept、Topic、REFINES、PREREQUISITE
     keypoints/              讲解要点
     exercises/              习题、答案与解析
@@ -248,6 +267,7 @@ docs/assets/                README 展示素材
 
 - 教材编排顺序与先修关系分别保存；教材轨道的箭头不转换成先修边。
 - 教材目录视图保留章节顺位与关联知识点，公开包未包含原书章节标题和印刷编号。
+- 独立来源视图沿用 `Textbook`、`TextbookChapter`、`TEACHES` 类型；`source-links.jsonl` 是辅助索引，不新增知识点或先修边。系列匹配不等于完全相同出版版次；多个候选教材记录会保留歧义，不合并两套目录的教学顺序。
 - 学习路径是先修约束下的一条可行顺序；已掌握标记仅保存在当前浏览器。
 - 数据保留原始来源与审核状态。资源存在和关联正确性是不同指标，机器审核不表示人工核验。
 - 教材参考封面按出版社、学科、系列与册次匹配，具体印次未逐一核验；点击封面可追溯来源。未匹配时使用文字封面。
@@ -296,6 +316,7 @@ TBD
 
 - **代码**：[Apache 2.0](LICENSE)
 - **公开教育数据**：[CC BY-SA 4.0](LICENSE-DATA)，详细说明见 [Data Card](DATA_CARD.md)。
+- **教材来源核对**：基于 [TapXWorld/ChinaTextbook](https://github.com/TapXWorld/ChinaTextbook/tree/e2b3f62213c77bb8c33c5be355f97625ea1b8b61) 的固定来源快照构建结构候选与关联。公开包不分发教材 PDF、正文、OCR 文本或原目录标题。
 - **教材封面**：来自 [TapXWorld/ChinaTextbook](https://github.com/TapXWorld/ChinaTextbook)，保留每张图片的来源与匹配信息。封面版权归相应出版社及权利人，不随教育数据重新授予 CC BY-SA 许可，见 [封面来源说明](web/assets/covers/NOTICE.txt)。
 - 项目展示风格参考 [PAGER](https://github.com/OpenRaiser/Pager) 与 [PaperFit](https://github.com/OpenRaiser/PaperFit)；README 的介绍与使用引导参考 [AgentPilot](https://github.com/HKUDS/AgentPilot) 的组织方式。
 

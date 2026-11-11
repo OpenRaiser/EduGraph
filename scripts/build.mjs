@@ -7,16 +7,18 @@ import { InvertedIndex } from '../web/core/bm25.mjs';
 import {verifyPublicSite,verifyReleaseArchive} from './verify-public-site.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
-const source = path.join(root, 'data/open/v0.21.0');
+const release = JSON.parse(await readFile(path.join(root,'data/release.json'),'utf8'));
+if(!/^\d+\.\d+\.\d+$/.test(release.version)||release.sourceViews!==`source-views-v${release.version}`)throw new Error('Invalid release configuration');
+const source = path.join(root, `data/open/v${release.version}`);
 const out = path.join(root, 'dist');
 try{await stat(path.join(source,'manifest.json'));}catch(error){
   if(error.code!=='ENOENT')throw error;
-  const archive=path.join(root,'data/edugraph-v0.21.0.tar.gz');
+  const archive=path.join(root,`data/edugraph-v${release.version}.tar.gz`);
   const expected=(await readFile(archive+'.sha256','utf8')).trim().split(/\s+/)[0];
   if(!/^[0-9a-f]{64}$/.test(expected)||createHash('sha256').update(await readFile(archive)).digest('hex')!==expected)throw new Error('Source release archive checksum mismatch');
-  verifyReleaseArchive(archive);
+  verifyReleaseArchive(archive,release.version);
   await mkdir(path.dirname(source),{recursive:true});
-  execFileSync('tar',['-xzf',archive,'-C',path.dirname(source),'v0.21.0'],{stdio:'pipe'});
+  execFileSync('tar',['-xzf',archive,'-C',path.dirname(source),`v${release.version}`],{stdio:'pipe'});
 }
 const readJson = async p => JSON.parse(await readFile(p, 'utf8'));
 const readLines = async p => (await readFile(p, 'utf8')).split(/\r?\n/).filter(Boolean).map(JSON.parse);
@@ -36,6 +38,9 @@ async function json(rel, data) {
 }
 function pick(row, names) { return Object.fromEntries(names.filter(k => row[k] !== undefined).map(k => [k, row[k]])); }
 const manifest = await readJson(path.join(source, 'manifest.json'));
+const sourceFolder=path.join(root,'data',release.sourceViews);
+const sourceIndex=await readJson(path.join(sourceFolder,'index.json'));
+const [sourceBooks,sourceChapters,sourceTeaches,sourceLinks]=await Promise.all(['textbooks','chapters','teaches','source-links'].map(n=>readLines(path.join(sourceFolder,n+'.jsonl'))));
 const nodes = (await Promise.all((await files(path.join(source, 'knowledge-points'), 'nodes.jsonl')).map(readLines))).flat();
 const edges = (await Promise.all((await files(path.join(source, 'knowledge-points'), 'edges.jsonl')).map(readLines))).flat();
 const byKey = new Map(nodes.map((n,i) => [n.key,i]));
@@ -52,6 +57,9 @@ for (const c of covers) {
   standardMap.get(c.to).push(pick(c,['from','score','method','review_status']));
 }
 await mkdir(out, { recursive: true });
+// Delete only obsolete generated downloads inside the known output folder.
+await mkdir(path.join(out,'downloads'),{recursive:true});
+for(const name of await readdir(path.join(out,'downloads')))if(/^edugraph-v\d+\.\d+\.\d+\.tar\.gz(?:\.sha256)?$/.test(name)&&!name.startsWith(`edugraph-v${release.version}.tar.gz`))await rm(path.join(out,'downloads',name));
 // Remove only retired theme files when rebuilding an existing output directory.
 for(const legacy of ['cosmos.css','assets/cosmic-stars.svg','assets/cosmic-nebula.svg'])await rm(path.join(out,legacy),{force:true});
 const coverCatalog=await readJson(path.join(root,'web/assets/covers/catalog.json'));
@@ -79,7 +87,7 @@ for (const scope of scopes) {
   const conceptData = Object.create(null);
   const entry = k => {
     if(!byKey.has(k)) throw new Error(`Unknown resource key ${k}`);
-    return conceptData[byKey.get(k)] ??= { keypoints:[], exercises:[], standards:standardMap.get(k)??[], teaches:[] };
+    return conceptData[byKey.get(k)] ??= { keypoints:[], exercises:[], standards:standardMap.get(k)??[], teaches:[], sourceTeaches:[] };
   };
   for (const n of nodes.filter(n=>`${n.subject}/${n.stage}`===scope)) entry(n.key);
   for (const k of keypoints) entry(k.kp_key).keypoints.push(pick(k,['key','kind','title','body','derived_from','authored_by','review_status']));
@@ -87,12 +95,19 @@ for (const scope of scopes) {
   const chapterIds = new Set(chapters.map(c=>c.chapter_id));
   for (const t of teaches) {
     if(!chapterIds.has(t.from)) throw new Error(`Unknown chapter ${t.from}`);
-    entry(t.to).teaches.push(pick(t,['from','role','confidence','method','review_status','standard_anchor']));
+    entry(t.to).teaches.push(pick(t,['from','role','confidence','method','review_status','standard_anchor','uncertain']));
   }
   // Store every chapter's concept mappings so the entire catalog view can be explored.
   const chapterConcepts = Object.create(null);
   for (const t of teaches) (chapterConcepts[t.from]??=[]).push({id:byKey.get(t.to),role:t.role});
-  await json(`data/resources/${scope}.json`,{concepts:conceptData,textbooks:textbooks.map(t=>pick(t,['textbook_id','publisher','series','edition','grade','volume','volume_label','subject','stage','review_status','toc_completeness'])),chapters:chapters.map(c=>pick(c,['chapter_id','textbook_id','parent_id','level','order','uncertain'])),chapterConcepts});
+  const sourceViews=sourceBooks.filter(b=>`${b.subject}/${b.stage}`===scope).map(book=>{
+    const link=sourceLinks.find(l=>l.source_textbook_id===book.textbook_id),cs=sourceChapters.filter(c=>c.textbook_id===book.textbook_id),ids=new Set(cs.map(c=>c.chapter_id));
+    const ts=sourceTeaches.filter(t=>ids.has(t.from)),cc=Object.create(null);
+    for(const t of ts){if(!byKey.has(t.to))throw new Error('Invalid source Concept');entry(t.to).sourceTeaches.push({source_id:link.source_id,...pick(t,['from','role','review_status','uncertain'])});(cc[t.from]??=[]).push({id:byKey.get(t.to),...pick(t,['role','review_status','uncertain'])});}
+    if(!link.existing_textbook_ids.every(id=>textbooks.some(b=>b.textbook_id===id)))throw new Error('Invalid source textbook link');
+    return {source_id:link.source_id,textbook:book,chapters:cs,teaches:ts,chapterConcepts:cc,...pick(link,['existing_textbook_ids','preferred_textbook_id','source_url','catalog_status'])};
+  });
+  await json(`data/resources/${scope}.json`,{concepts:conceptData,textbooks:textbooks.map(t=>pick(t,['textbook_id','publisher','series','variant','edition','grade','volume','volume_label','subject','stage','source','review_status','toc_completeness'])),chapters:chapters.map(c=>pick(c,['chapter_id','textbook_id','parent_id','level','order','uncertain'])),chapterConcepts,sourceViews});
   summary.push({subject:scope.split('/')[0],stage:scope.split('/')[1],concepts:nodes.filter(n=>`${n.subject}/${n.stage}`===scope&&n.node_kind!=='topic').length,keypoints:keypoints.length,exercises:exercises.length,textbooks:textbooks.length});
 }
 for (const [actual,k] of [[exercisesTotal,'exercises'],[keypointsTotal,'keypoints'],[chaptersTotal,'textbook_chapters'],[textbooksTotal,'textbooks'],[teachesTotal,'teaches_edges']]) if(actual!==manifest.counts[k]) throw new Error(`${k} count mismatch`);
@@ -102,10 +117,10 @@ await json('data/standards.json',standards.map(s=>pick(s,['id','text','subject',
 const index = new InvertedIndex();
 for(const n of nodes) index.addDoc({key:n.key,name:n.name,aliases:n.aliases,levelPath:n.level_path});
 await json('data/search.json', index.serialize());
-await json('data/manifest.json',{version:manifest.graph_version,counts:manifest.counts,coverage:manifest.coverage,scopes:summary,defaultKey:nodes.find(n=>n.name==='分数'&&n.stage==='primary')?.key,generatedAt:new Date().toISOString()});
+await json('data/manifest.json',{version:manifest.graph_version,counts:manifest.counts,coverage:manifest.coverage,sourceViews:sourceIndex,scopes:summary,defaultKey:nodes.find(n=>n.name==='分数'&&n.stage==='primary')?.key,generatedAt:new Date().toISOString()});
 await mkdir(path.join(out,'downloads'),{recursive:true});
 const archive = path.join(out,'downloads',`edugraph-v${manifest.graph_version}.tar.gz`);
-execFileSync('tar',['-czf',archive,'-C',path.dirname(source),path.basename(source),'-C',root,'LICENSE-DATA','DATA_CARD.md'],{stdio:'pipe'});
+execFileSync('tar',['-czf',archive,'-C',path.dirname(source),path.basename(source),'-C',path.join(root,'data'),release.sourceViews,'-C',root,'LICENSE-DATA','DATA_CARD.md'],{stdio:'pipe'});
 const digest = createHash('sha256').update(await readFile(archive)).digest('hex');
 await writeFile(`${archive}.sha256`,`${digest}  ${path.basename(archive)}\n`);
 await json('data/download.json',{file:`downloads/${path.basename(archive)}`,sha256:digest,bytes:(await stat(archive)).size});

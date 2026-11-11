@@ -4,21 +4,24 @@ import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 
-export function verifyReleaseArchive(archive,version='0.21.0'){
+export function verifyReleaseArchive(archive,version='0.24.0'){
   const listing=execFileSync('tar',['-tzf',archive],{encoding:'utf8'}).split(/\r?\n/).filter(Boolean);
   const types=execFileSync('tar',['-tvzf',archive],{encoding:'utf8'}).split(/\r?\n/).filter(Boolean);
   if(types.some(line=>!['-','d'].includes(line[0])))throw new Error('Release archive must contain only ordinary files and directories.');
   const root=`v${version}`;
   const families=new Set(['changes','exercises','index','keypoints','keys','knowledge-points','standards','standards-alignment','textbook-alignment']);
+  const views=`source-views-v${version}`,viewFiles=new Set(['index.json','textbooks.jsonl','chapters.jsonl','teaches.jsonl','source-links.jsonl']);
   for(const raw of listing){
     const name=raw.replace(/\/$/,'');
     if(name==='LICENSE-DATA'||name==='DATA_CARD.md')continue;
+    if(name===views||[...viewFiles].some(f=>name===`${views}/${f}`))continue;
     if(name===root||name===`${root}/manifest.json`)continue;
     const parts=name.split('/');
     if(parts.some(p=>p==='..'||p===''||p==='.')||parts[0]!==root||!families.has(parts[1]))throw new Error(`Unexpected file in public data archive: ${raw}`);
     if(!raw.endsWith('/')&&!/\.jsonl?$/.test(name))throw new Error(`Unexpected file type in public archive: ${raw}`);
   }
   if(!listing.includes('LICENSE-DATA')||!listing.includes('DATA_CARD.md'))throw new Error('Public data archive is missing its license or data card.');
+  for(const file of viewFiles)if(!listing.includes(`${views}/${file}`))throw new Error('Source-view release file missing: '+file);
   return listing.length;
 }
 async function listFiles(root,folder=root){
@@ -43,6 +46,7 @@ export async function verifyPublicSite(root=fileURLToPath(new URL('../dist/',imp
   const allowed=new Set(['index.html','404.html','styles.css','app.mjs','model.mjs','network.mjs','covers.mjs','.nojekyll','LICENSE','LICENSE-DATA','assets/favicon.svg','assets/figure-2.png','assets/figure-3.png','assets/covers/catalog.json','assets/covers/NOTICE.txt','core/graph.mjs','core/bm25.mjs','core/tokenize.mjs','data/graph.json','data/search.json','data/standards.json','data/manifest.json','data/download.json',`downloads/edugraph-v${manifest.version}.tar.gz`,`downloads/edugraph-v${manifest.version}.tar.gz.sha256`]);
   const catalog=JSON.parse(await readFile(path.join(root,'assets/covers/catalog.json'),'utf8'));
   for(const file of ['learning.css','hero.mjs'])allowed.add(file);
+  allowed.add('textbook-views.mjs');
   if(catalog.schema!==1||!(/^[0-9a-f]{40}$/).test(catalog.sourceRevision))throw new Error('Invalid cover catalog');
   for(const [id,cover]of Object.entries(catalog.covers)){
     if(!/^[0-9a-f]{16}$/.test(id)||cover.asset!==`assets/covers/${id}.jpg`||!cover.source.startsWith(`https://github.com/TapXWorld/ChinaTextbook/blob/${catalog.sourceRevision}/`))throw new Error('Invalid cover asset or source');
