@@ -24,7 +24,7 @@
         <div class="sidebar-tabs" role="tablist"><button id="browse-results" class="active" role="tab" aria-selected="true">知识列表</button><button id="browse-tree" role="tab" aria-selected="false">层级导航</button><span id="result-count"></span></div>
       </div>
       <div id="result-list" class="result-list" aria-live="polite"></div>
-      <div class="sidebar-foot"><span class="live-dot"></span><span id="sidebar-stat">5,269 concepts · 10 subjects</span></div>
+      <div class="sidebar-foot"><span class="live-dot"></span><span id="sidebar-stat">正在读取图谱规模…</span></div>
     </aside>
     <section class="graph-panel" aria-label="知识图谱">
       <div class="graph-top"><div><div class="eyebrow">KNOWLEDGE IN CONTEXT</div><h2 id="graph-title">知识关系</h2></div><div class="view-switch" role="tablist"><button id="view-network" class="active" role="tab" aria-selected="true">关系图谱</button><button id="view-textbooks" role="tab" aria-selected="false">教材编排</button></div></div>
@@ -42,12 +42,13 @@
       <div class="hero-visual"><div id="hero-network" class="hero-network"></div><p class="hero-network-caption">以「分数」为例 · 点击节点探索真实关联</p></div>
     </section>
     <div id="about-stats" class="about-stats"></div>
+    <p id="publication-note" class="textbook-note" hidden>本次公开快照包含扩充草稿。新增信息技术、音乐、美术、艺术目前为高中首批；三项艺术课程已连接课标与主题，讲解、习题、教材映射和先修关系仍待补充。详情中的审核状态保留不变。</p>
     <section class="about-section"><div class="section-heading"><div><div class="eyebrow">01 / CONNECTED STRUCTURE</div><h2>同一套知识，多种教材视角</h2></div><p>课程要求连接共享 Concept；不同出版社保留独立的编排顺序。</p></div><figure><img src="assets/figure-2.png" loading="lazy" alt="课标、共享知识网络与不同教材视图之间的关系"><figcaption>Figure 2 · Standards, shared concepts and textbook views. 论文数据快照；图中数值保留论文实验口径，当前发布规模见上方统计及下载包。</figcaption></figure></section>
-    <section class="about-section"><div class="section-heading"><div><div class="eyebrow">02 / DATA LANDSCAPE</div><h2>从知识全景，到跨学段路径</h2></div><p>涵盖十个学科，连接小学、初中与高中阶段的知识和教学资源。</p></div><figure><img src="assets/figure-3.png" loading="lazy" alt="论文 Figure 3：学科知识全景、跨学段先修链、资源覆盖及分层精度"><figcaption>Figure 3 · Concept landscape, a cross-stage prerequisite chain, coverage, and precision by layer. 论文数据快照；覆盖率与精度对应论文实验，不代表新增教材候选已完成人工审核。</figcaption></figure></section>
+    <section class="about-section"><div class="section-heading"><div><div class="eyebrow">02 / DATA LANDSCAPE</div><h2>从知识全景，到跨学段路径</h2></div><p id="landscape-description">按实际收录范围连接各学科、学段的知识与教学资源。</p></div><figure><img src="assets/figure-3.png" loading="lazy" alt="论文 Figure 3：学科知识全景、跨学段先修链、资源覆盖及分层精度"><figcaption>Figure 3 · Concept landscape, a cross-stage prerequisite chain, coverage, and precision by layer. 论文数据快照；覆盖率与精度对应论文实验，不代表新增教材候选已完成人工审核。</figcaption></figure></section>
     <section class="about-bottom"><div><div class="eyebrow">OPEN & TRACEABLE</div><h2>浏览、下载、构建你的应用</h2><p>页面中的关系来自公开数据。教材视图展示章节顺位及关联知识点，未包含原书章节标题与印刷编号。学习路径由先修关系生成；已掌握标记只保存在当前浏览器。</p><p>讲解、题目及映射保留原始审核状态，可在详情中查看。</p></div><div class="download-card"><strong>EduGraph public release</strong><p id="download-description"></p><a id="download-card" class="button primary" download>下载完整公开包 ↓</a><a href="LICENSE-DATA" target="_blank">数据许可 · CC BY-SA 4.0 ↗</a><a href="LICENSE" target="_blank">代码许可 · Apache 2.0 ↗</a><a id="checksum-link" download>SHA-256 校验文件 ↓</a></div></section>
     <footer class="about-footer"><span>EduGraph · Connected knowledge for education agents</span><a href="#/explore">返回探索 ↗</a></footer>
   </main>
-  <dialog id="path-dialog"><div class="dialog-header"><div><div class="eyebrow">PREREQUISITE-BASED PLANNING</div><h2 id="path-title">学习路径</h2></div><button id="close-path" class="icon-button" aria-label="关闭学习路径">×</button></div><p id="path-description" class="dialog-description"></p><div id="known-summary" class="known-summary"></div><div id="path-content" class="path-content"></div><div class="dialog-bottom"><span>先修约束下的一条可行顺序；教材编排可单独查看。</span><button id="clear-known" class="text-button">清空已掌握标记</button></div></dialog>
+  <dialog id="path-dialog"><div class="dialog-header"><div><div class="eyebrow">PREREQUISITE-BASED PLANNING</div><h2 id="path-title">学习路径</h2></div><button id="close-path" class="icon-button" aria-label="关闭学习路径">×</button></div><p id="path-description" class="dialog-description"></p><div id="known-summary" class="known-summary"></div><div id="path-content" class="path-content"></div><div class="dialog-bottom"><span id="path-footnote">先修约束下的一条可行顺序；教材编排可单独查看。</span><button id="clear-known" class="text-button">清空已掌握标记</button></div></dialog>
   <div id="toast" class="toast" role="status" hidden></div>
   <noscript>请启用 JavaScript，以浏览、检索和展开 EduGraph 数据。</noscript>
   <script type="module" src="app.mjs"></script>
