@@ -55,7 +55,7 @@ export async function verifyPublicSite(root=fileURLToPath(new URL('../dist/',imp
     allowed.add(cover.asset);
   }
   for(const scope of manifest.scopes){
-    if(!/^[a-z]+$/.test(scope.subject)||!['primary','junior','senior'].includes(scope.stage))throw new Error('Invalid public resource partition');
+    if(!/^[a-z]+(?:-[a-z]+)*$/.test(scope.subject)||!['primary','junior','senior'].includes(scope.stage))throw new Error('Invalid public resource partition');
     allowed.add(`data/resources/${scope.subject}/${scope.stage}.json`);
   }
   const files=await listFiles(root);verifyArtifactPaths(files,allowed);

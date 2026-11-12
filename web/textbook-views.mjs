@@ -1,5 +1,10 @@
 // Alternate source catalogs belong to existing books; never merge their order.
 export function editionLabel(book){return book?.edition?`目录版本 ${book.edition}`:'版次未确认';}
+export function volumeLabel(book){
+  if(book?.volume_label)return book.volume_label;
+  const grade=book?.grade?.match(/^grade(\d+)$/)?.[1];
+  return [grade?`${grade} 年级`:null,book?.volume].filter(Boolean).join(' · ')||'册次待确认';
+}
 export function sourceUrl(view){
   try{const url=new URL(view?.source_url);return url.protocol==='https:'&&url.hostname==='github.com'&&url.pathname.startsWith('/TapXWorld/ChinaTextbook/')?url.href:null;}catch{return null;}
 }

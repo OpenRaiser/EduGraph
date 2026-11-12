@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile,readdir} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
-import {createModel,findNodes,neighborhood,orderChapters} from '../web/model.mjs';
+import {createModel,findNodes,neighborhood,pathEvidence,orderChapters,SUBJECTS,statusLabel} from '../web/model.mjs';
 const read=async p=>JSON.parse(await readFile(new URL('../dist/'+p,import.meta.url),'utf8'));
 const [graph,index,manifest]=await Promise.all([read('data/graph.json'),read('data/search.json'),read('data/manifest.json')]);
 const model=createModel(graph,index);
@@ -10,10 +10,42 @@ const fraction=model.nodes.find(n=>n.name==='分数'&&n.stage==='primary');
 const conversion=model.nodes.find(n=>n.name==='小数与分数的互化'&&n.stage==='primary');
 const decimal=model.nodes.find(n=>n.name==='小数'&&n.stage==='primary');
 test('The public graph matches the complete release and has no prerequisite cycles',()=>{
-  assert.equal(model.nodes.length,6591);assert.equal(model.nodes.filter(n=>n.node_kind!=='topic').length,5269);
-  assert.equal(model.edges.filter(e=>e.type==='PREREQUISITE').length,4882);
-  assert.equal(model.edges.filter(e=>e.type==='REFINES').length,6417);
+  assert.equal(model.nodes.length,7113);assert.equal(model.nodes.filter(n=>n.node_kind!=='topic').length,5749);
+  assert.equal(model.edges.filter(e=>e.type==='PREREQUISITE').length,4994);
+  assert.equal(model.edges.filter(e=>e.type==='REFINES').length,6897);
   assert.equal(model.graph.findDanglingEdges().length,0);assert.equal(model.graph.findCycles().length,0);
+});
+
+test('New subject drafts retain curriculum links, explicit empty arts resources and usable Chinese search',async()=>{
+  assert.equal(new Set(manifest.scopes.map(s=>s.subject)).size,14);assert.equal(manifest.scopes.length,28);
+  assert.equal(manifest.publication_status,'public-preview');
+  for(const [subject,name,count] of [['music','音高',92],['fine-arts','中国画',157],['arts','艺术起源',62]]){
+    assert.ok(SUBJECTS[subject]);
+    const result=findNodes(model,name,{subject,stage:'senior'});assert.equal(result[0].name,name);
+    const concepts=model.nodes.filter(n=>n.subject===subject&&n.node_kind==='knowledge_point');assert.equal(concepts.length,count);
+    const shard=await read(`data/resources/${subject}/senior.json`);assert.deepEqual(shard.textbooks,[]);assert.deepEqual(shard.chapters,[]);
+    for(const node of concepts){
+      assert.equal(node.review_status,'draft');const entry=shard.concepts[node.id];assert.ok(entry.standards.length>0);
+      assert.deepEqual(entry.keypoints,[]);assert.deepEqual(entry.exercises,[]);assert.deepEqual(entry.teaches,[]);
+      assert.equal(pathEvidence(model,node.key).hasPrerequisites,false);
+      assert.ok(neighborhood(model,node.key).edges.some(e=>e.type==='REFINES'));
+    }
+  }
+});
+
+test('Information technology retains authored drafts, module textbooks and candidate path evidence',async()=>{
+  const shard=await read('data/resources/information-technology/senior.json');assert.equal(shard.textbooks.length,48);
+  const concepts=model.nodes.filter(n=>n.subject==='information-technology'&&n.node_kind==='knowledge_point');assert.equal(concepts.length,169);
+  let points=0,exercises=0,teaches=0,withCandidate=0;
+  for(const n of concepts){
+    const r=shard.concepts[n.id];assert.equal(r.keypoints.length,2);assert.equal(r.exercises.length,1);
+    assert.ok(r.keypoints.every(k=>k.review_status==='draft'));assert.ok(r.exercises.every(e=>e.review_status==='draft'));
+    points+=r.keypoints.length;exercises+=r.exercises.length;teaches+=r.teaches.length;
+    withCandidate+=Number(pathEvidence(model,n.key).candidatePrerequisites>0);
+  }
+  assert.equal(points,338);assert.equal(exercises,169);assert.equal(teaches,396);assert.ok(withCandidate>0);
+  assert.equal(statusLabel('candidate'),'先修候选');assert.ok(shard.textbooks.every(b=>b.grade===null&&b.volume_label));
+  assert.equal(findNodes(model,'数据编码',{subject:'information-technology',stage:'senior'})[0].name,'数据编码');
 });
 test('Chinese retrieval finds the exact concept and respects subject/stage filters',()=>{
   const found=findNodes(model,'分数',{subject:'mathematics',stage:'primary'});assert.equal(found[0].key,fraction.key);

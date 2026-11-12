@@ -15,19 +15,22 @@
 
 <p>
   <a href="https://openraiser.github.io/EduGraph/"><img src="https://img.shields.io/badge/EXPLORE-LIVE-2563a8?style=for-the-badge&amp;logo=githubpages&amp;logoColor=white" alt="Explore EduGraph online"></a>
-  <img src="https://img.shields.io/badge/CONCEPTS-5%2C269-2aa7c7?style=for-the-badge" alt="5269 Concepts">
-  <img src="https://img.shields.io/badge/SUBJECTS-10-f18b42?style=for-the-badge" alt="10 Subjects">
+  <img src="https://img.shields.io/badge/CONCEPTS-5%2C749-2aa7c7?style=for-the-badge" alt="5749 Concepts">
+  <img src="https://img.shields.io/badge/SUBJECTS-14-f18b42?style=for-the-badge" alt="14 Subjects">
+  <img src="https://img.shields.io/badge/DATA-v0.25.0_PREVIEW-607f9e?style=for-the-badge" alt="Data v0.25.0 public preview">
   <a href="LICENSE-DATA"><img src="https://img.shields.io/badge/DATA-CC_BY--SA_4.0-17365c?style=for-the-badge" alt="Data license CC BY-SA 4.0"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/CODE-Apache_2.0-607f9e?style=for-the-badge" alt="Code license Apache 2.0"></a>
 </p>
 
 <p>
   <a href="https://openraiser.github.io/EduGraph/"><b>🌐 在线探索</b></a> ·
-  <a href="https://openraiser.github.io/EduGraph/downloads/edugraph-v0.24.0.tar.gz"><b>📦 下载数据</b></a> ·
+  <a href="https://openraiser.github.io/EduGraph/downloads/edugraph-v0.25.0.tar.gz"><b>📦 下载数据</b></a> ·
   <a href="#features"><b>✨ 核心能力</b></a> ·
   <a href="#integration"><b>🔌 接入应用</b></a> ·
   <a href="#quickstart"><b>🚀 本地运行</b></a>
 </p>
+
+<sub>展示插图保留论文与早期网站快照；当前规模以本文数据概览和下载包 manifest 为准。</sub>
 
 </div>
 
@@ -128,43 +131,59 @@ EduGraph 以共享的 Concept 标识连接课程要求、先修关系和教学�
 
 ## 📊 数据概览
 
-覆盖 **10 个学科、3 个学段**，连接知识结构与教学资源。以下为 **v0.24.0 主图**的精确计数；独立来源目录视图另列，不重复计入教材总量。
+当前 **v0.25.0 公开预览（public-preview）**覆盖 **14 个学科、3 个学段**。以下为主图的精确计数；独立来源目录视图另列，不重复计入教材总量。新增内容保留 `draft` / candidate 状态，公开预览不表示完成教师审核。
 
-**学科**：数学、语文、英语、物理、化学、生物、历史、地理、道德与法治、科学。**学段**：小学、初中、高中；按实际课程设置组织为 24 个学科—学段分区。
+**既有学科**：数学、语文、英语、物理、化学、生物、历史、地理、道德与法治、科学。**本轮新增**：信息技术、音乐、美术、艺术，四科目前均仅包含**高中**分区。全图按实际内容组织为 **28 个学科—学段分区**，不表示每门学科均覆盖小学、初中、高中。
 
 | 知识与关系 | 数量 | 教学资源 | 数量 |
 |:---|---:|:---|---:|
-| Concept · 知识点 | **5,269** | KeyPoint · 讲解要点 | **11,765** |
-| Topic · 主题 | **1,322** | Exercise · 习题 | **7,107** |
-| PREREQUISITE · 先修关系 | **4,882** | StandardItem · 课标条目 | **2,844** |
-| REFINES · 分类层级 | **6,417** | Textbook · 教材册次 | **1,113** |
-| COVERS · 课标关联 | **7,694** | Chapter · 教材章节 | **10,926** |
-| TEACHES · 教材关联 | **23,015** | Subject / Stage · 学科 / 学段 | **10 / 3** |
+| Concept · 知识点 | **5,749** | KeyPoint · 讲解要点 | **12,103** |
+| Topic · 主题 | **1,364** | Exercise · 习题 | **7,276** |
+| PREREQUISITE · 先修关系 | **4,994** | StandardItem · 课标条目 | **3,073** |
+| REFINES · 分类层级 | **6,897** | Textbook · 教材册次 | **1,161** |
+| COVERS · 课标关联 | **8,276** | Chapter · 教材章节 | **12,607** |
+| TEACHES · 教材关联 | **23,411** | Subject / Stage · 学科 / 学段 | **14 / 3** |
+
+### 🌱 本轮新增：四门高中学科
+
+在 v0.24.0 基础上，新增 **480 个 Concept、42 个 Topic、229 条课标要求和 582 条 COVERS**：
+
+| 新增高中分区 | Concept | Topic | 课标条目 | COVERS |
+|:---|---:|---:|---:|---:|
+| 信息技术 | 169 | 10 | 75 | 181 |
+| 音乐 | 92 | 12 | 62 | 150 |
+| 美术 | 157 | 12 | 54 | 185 |
+| 艺术 | 62 | 8 | 38 | 66 |
+
+- **信息技术**同时新增 338 条讲解要点、169 道习题、112 条先修关系，以及 48 册教材、1,681 个目录节点和 396 条 TEACHES。
+- **音乐、美术、艺术**本批先提供课标、Concept、Topic 及其关联，尚未补充各自的讲解、习题、先修关系与教材映射。模块覆盖不等于教材内容已完整覆盖。
+- **生成来源明确**：本轮知识与学习资源由助手在当前会话中，依据课标并沿用原有数据结构编写、核对；尚未执行原构建流程的外部模型 API。来源核对和结构校验不等于教师审核，新增记录保留各自的草稿或候选状态。
 
 ### 📚 教材范围扩充
 
-本次发布接入 ChinaTextbook 中已有十学科的主教材来源。相较于此前公开的 v0.21.0，主图增加 **361 册教材、4,048 个目录节点和 1,044 条 TEACHES**；Concept、Topic、先修关系、讲解、习题与课标保持不变。
+此前 **v0.24.0** 已接入 ChinaTextbook 中既有十学科的主教材来源；相较 v0.21.0，该批增加 **361 册教材、4,048 个目录节点和 1,044 条 TEACHES**。这批记录在本次预览中保留，上述高中信息技术扩充另计。
 
 - **980 份主教材来源完成范围匹配**：结合学科、学制、系列或主编、年级和册次识别教材；957 份对应单一主图记录，23 份对应同系列多个年份记录。活动手册、读本等 72 份补充材料暂未纳入本轮。
 - **619 份独立来源视图**：已覆盖的教材保留其主图记录，ChinaTextbook 中不同来源的目录分别保存。这里含 **4,451 个目录节点、359 条候选 TEACHES**，通过辅助索引连接已有教材，不因 PDF 或年份差异重复计算教材册数。
-- **审核状态可追溯**：619 份独立视图中，391 份恢复了目录候选，228 份尚无可用目录；范围匹配不代表目录完整。本轮目录深化和独立来源匹配的新映射标记为 `draft` / `uncertain`，先前批次保留各自的审核状态。
+- **本次原样延续独立视图**：上述 619 份视图及其 4,451 个目录节点、359 条候选关联沿用 v0.24.0 内容，仅随新包放置于 `source-views-v0.25.0/`，索引以 `carried_from` 记录来源版本；不将其重新计算为本轮新增。
+- **审核状态可追溯**：619 份独立视图中，391 份恢复了目录候选，228 份尚无可用目录；范围匹配不代表目录完整。该批目录深化和独立来源匹配保留 `draft` / `uncertain` 标记，其他记录保留各自的审核状态。
 
-[查看来源视图与索引 →](data/source-views-v0.24.0/) · [字段与统计口径 →](DATA_CARD.md)
+[查看来源视图与索引 →](data/source-views-v0.25.0/) · [字段与统计口径 →](DATA_CARD.md)
 
 <p align="center">
   <img src="web/assets/figure-3.png" alt="Concept landscape, a cross-stage prerequisite chain, coverage and precision by layer" width="1100" />
-  <br><sub>论文中的数据分析快照：教材与覆盖率数字对应扩充前的数据；当前公开规模以上表和 manifest 为准。</sub>
+  <br><sub>论文中的历史数据分析快照：图中知识点、学科、教材与覆盖率数字对应扩充前的数据；当前公开预览规模以上表和 manifest 为准。</sub>
 </p>
 
-📥 **[下载完整数据包](https://openraiser.github.io/EduGraph/downloads/edugraph-v0.24.0.tar.gz)** · [SHA-256 校验](https://openraiser.github.io/EduGraph/downloads/edugraph-v0.24.0.tar.gz.sha256) · [Data Card](DATA_CARD.md)
+📥 **[下载公开预览数据包](https://openraiser.github.io/EduGraph/downloads/edugraph-v0.25.0.tar.gz)** · [SHA-256 校验](https://openraiser.github.io/EduGraph/downloads/edugraph-v0.25.0.tar.gz.sha256) · [Data Card](DATA_CARD.md)
 
-下载包同时包含 `v0.24.0/` 主图和 `source-views-v0.24.0/` 独立来源视图。两层共享知识点，且教材范围重叠，**不能直接相加作为数据集规模**。
+下载包同时包含 `v0.25.0/` 主图和 `source-views-v0.25.0/` 独立来源视图。两层共享知识点，且教材范围重叠，**不能直接相加作为数据集规模**。
 
 <a id="quickstart"></a>
 
 ## 🚀 本地运行
 
-只想浏览，直接打开 [在线 Explorer](https://openraiser.github.io/EduGraph/)；只需数据，直接 [下载公开包](https://openraiser.github.io/EduGraph/downloads/edugraph-v0.24.0.tar.gz)。开发或自部署可使用以下步骤。
+只想浏览，直接打开 [在线 Explorer](https://openraiser.github.io/EduGraph/)；只需数据，直接 [下载公开预览包](https://openraiser.github.io/EduGraph/downloads/edugraph-v0.25.0.tar.gz)。开发或自部署可使用以下步骤。
 
 需要 **Node.js ≥ 20.11** 和 `tar`。网页与构建工具无需安装 npm 依赖。
 
@@ -176,7 +195,7 @@ npm test
 npm run dev
 ```
 
-打开 **http://127.0.0.1:4173/EduGraph/**。首次构建会校验并解压公开数据包，生成检索索引和 24 个按学科、学段划分的资源文件。
+打开 **http://127.0.0.1:4173/EduGraph/**。首次构建会校验并解压公开数据包，生成检索索引和 28 个按学科、学段划分的资源文件。
 
 <a id="integration"></a>
 
@@ -230,15 +249,15 @@ console.log(JSON.stringify(context, null, 2));
 
 ```text
 data/
-  edugraph-v0.24.0.tar.gz      主图、来源视图及数据说明
-  edugraph-v0.24.0.tar.gz.sha256
-  source-views-v0.24.0/       独立来源的结构数据与教材关联索引
+  edugraph-v0.25.0.tar.gz      公开预览主图、来源视图及数据说明
+  edugraph-v0.25.0.tar.gz.sha256
+  source-views-v0.25.0/       沿用 v0.24.0 的独立来源视图与教材关联索引
     textbooks.jsonl         来源视图的教材元数据
     chapters.jsonl          各来源自己的目录层级与顺序
     teaches.jsonl           目录到已有 Concept 的候选关联
     source-links.jsonl      来源视图与主图教材的对应关系
     index.json              视图规模、范围说明与校验信息
-  open/v0.24.0/              构建时解压，Git 忽略
+  open/v0.25.0/              构建时解压，Git 忽略；通过归档分发
     knowledge-points/       Concept、Topic、REFINES、PREREQUISITE
     keypoints/              讲解要点
     exercises/              习题、答案与解析
@@ -270,6 +289,7 @@ docs/assets/                README 展示素材
 - 独立来源视图沿用 `Textbook`、`TextbookChapter`、`TEACHES` 类型；`source-links.jsonl` 是辅助索引，不新增知识点或先修边。系列匹配不等于完全相同出版版次；多个候选教材记录会保留歧义，不合并两套目录的教学顺序。
 - 学习路径是先修约束下的一条可行顺序；已掌握标记仅保存在当前浏览器。
 - 数据保留原始来源与审核状态。资源存在和关联正确性是不同指标，机器审核不表示人工核验。
+- 新增四科仅覆盖高中；音乐、美术、艺术目前处于课标与知识结构层，关联资源不足时浏览器可能显示空列表。这不表示原教材不存在相应内容。
 - 教材参考封面按出版社、学科、系列与册次匹配，具体印次未逐一核验；点击封面可追溯来源。未匹配时使用文字封面。
 - 完整公开数据包不含真实学生历史记录，浏览器也不向服务器上传学习标记。
 

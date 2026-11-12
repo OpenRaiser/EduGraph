@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {groupTextbooks,catalogForGroup,editionLabel,sourceUrl} from '../web/textbook-views.mjs';
+import {groupTextbooks,catalogForGroup,editionLabel,volumeLabel,sourceUrl} from '../web/textbook-views.mjs';
 const book={textbook_id:'book-a',publisher:'人民教育出版社',grade:'grade3',volume:'vol1'};
 const chapter={chapter_id:'main-1',textbook_id:'book-a',order:1};
 const source={source_id:'source-a',textbook:{...book,textbook_id:'source-book'},existing_textbook_ids:['book-a'],preferred_textbook_id:'book-a',
@@ -29,4 +29,10 @@ test('unknown editions and source URLs are displayed without invented metadata',
   assert.equal(sourceUrl({source_url:'javascript:alert(1)'}),null);
   assert.equal(sourceUrl({source_url:'https://example.com/ChinaTextbook/book'}),null);
   assert.equal(sourceUrl({source_url:'https://github.com/TapXWorld/ChinaTextbook/blob/hash/book.pdf'}),'https://github.com/TapXWorld/ChinaTextbook/blob/hash/book.pdf');
+});
+test('module textbooks do not invent a grade when none is specified',()=>{
+  assert.equal(volumeLabel({grade:null,volume:'m1',volume_label:'必修1 数据与计算'}),'必修1 数据与计算');
+  assert.equal(volumeLabel({grade:null,volume:'m1'}),'m1');
+  assert.equal(volumeLabel({grade:'grade3',volume:'vol1'}),'3 年级 · vol1');
+  assert.equal(volumeLabel({}),'册次待确认');
 });

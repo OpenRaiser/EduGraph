@@ -108,16 +108,16 @@ for (const scope of scopes) {
     return {source_id:link.source_id,textbook:book,chapters:cs,teaches:ts,chapterConcepts:cc,...pick(link,['existing_textbook_ids','preferred_textbook_id','source_url','catalog_status'])};
   });
   await json(`data/resources/${scope}.json`,{concepts:conceptData,textbooks:textbooks.map(t=>pick(t,['textbook_id','publisher','series','variant','edition','grade','volume','volume_label','subject','stage','source','review_status','toc_completeness'])),chapters:chapters.map(c=>pick(c,['chapter_id','textbook_id','parent_id','level','order','uncertain'])),chapterConcepts,sourceViews});
-  summary.push({subject:scope.split('/')[0],stage:scope.split('/')[1],concepts:nodes.filter(n=>`${n.subject}/${n.stage}`===scope&&n.node_kind!=='topic').length,keypoints:keypoints.length,exercises:exercises.length,textbooks:textbooks.length});
+  summary.push({subject:scope.split('/')[0],stage:scope.split('/')[1],concepts:nodes.filter(n=>`${n.subject}/${n.stage}`===scope&&n.node_kind!=='topic').length,keypoints:keypoints.length,exercises:exercises.length,textbooks:textbooks.length,teaches:teaches.length,prerequisites:edges.filter(e=>e.type==='PREREQUISITE'&&(e.from.startsWith(scope.replace('/','.')+'.')||e.to.startsWith(scope.replace('/','.')+'.'))).length});
 }
 for (const [actual,k] of [[exercisesTotal,'exercises'],[keypointsTotal,'keypoints'],[chaptersTotal,'textbook_chapters'],[textbooksTotal,'textbooks'],[teachesTotal,'teaches_edges']]) if(actual!==manifest.counts[k]) throw new Error(`${k} count mismatch`);
-const lightNodes=nodes.map(n=>pick(n,['key','name','subject','stage','node_kind','level_path','aliases','grade_band','review_status']));
+const lightNodes=nodes.map(n=>pick(n,['key','name','subject','stage','node_kind','level_path','aliases','grade_band','summary','review_status']));
 await json('data/graph.json',{nodes:lightNodes,edges:edges.map(e=>[byKey.get(e.from),byKey.get(e.to),e.type,e.confidence??1,e.review_status??null,e.rationale??null])});
 await json('data/standards.json',standards.map(s=>pick(s,['id','text','subject','standard_family','education_phase','school_stage','grade_band','applicable_stage','cognitive_level','alignable'])));
 const index = new InvertedIndex();
 for(const n of nodes) index.addDoc({key:n.key,name:n.name,aliases:n.aliases,levelPath:n.level_path});
 await json('data/search.json', index.serialize());
-await json('data/manifest.json',{version:manifest.graph_version,counts:manifest.counts,coverage:manifest.coverage,sourceViews:sourceIndex,scopes:summary,defaultKey:nodes.find(n=>n.name==='分数'&&n.stage==='primary')?.key,generatedAt:new Date().toISOString()});
+await json('data/manifest.json',{version:manifest.graph_version,publication_status:manifest.publication_status,expansion_status:manifest.expansion_status,counts:manifest.counts,coverage:manifest.coverage,sourceViews:sourceIndex,scopes:summary,defaultKey:nodes.find(n=>n.name==='分数'&&n.stage==='primary')?.key,generatedAt:new Date().toISOString()});
 await mkdir(path.join(out,'downloads'),{recursive:true});
 const archive = path.join(out,'downloads',`edugraph-v${manifest.graph_version}.tar.gz`);
 execFileSync('tar',['-czf',archive,'-C',path.dirname(source),path.basename(source),'-C',path.join(root,'data'),release.sourceViews,'-C',root,'LICENSE-DATA','DATA_CARD.md'],{stdio:'pipe'});

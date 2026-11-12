@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "version": "0.25.0",
+  "source_repository": "https://github.com/TapXWorld/ChinaTextbook",
+  "source_revision": "e2b3f62213c77bb8c33c5be355f97625ea1b8b61",
+  "counts": {
+    "source_views": 619,
+    "with_catalog": 391,
+    "chapters": 4451,
+    "teaches": 359
+  },
+  "intake": {
+    "main_textbook_sources": 980,
+    "readable_sources": 980,
+    "sources_with_catalog": 752,
+    "previously_integrated_sources": 361
+  },
+  "scope": "Alternative source catalogs linked to existing textbook records at series/volume level. Not additional canonical textbooks. Excludes PDF text, original catalog titles, and internal audit material.",
+  "review": "Machine-derived catalog and mapping candidates. Source reading does not establish complete catalogs, identical publication editions, or teacher validation.",
+  "checksums": {
+    "textbooks.jsonl": "5b33f43b8fdae895adb7506ab1b8d4f32f7398907b15d230fdc36897a2f970ff",
+    "chapters.jsonl": "ebd70964a4ff5e24c76037d1f53eb81dbd3843327b4266bea4b0ccffd3f121b1",
+    "teaches.jsonl": "dc485c32a15ec1453220bbefbc89ea6c5827f0f53d81c66f6bdb62c7580b453e",
+    "source-links.jsonl": "d2a78634c3855df37356d4392bd6997e35cacd680a9059d93f72eb92dec256b6"
+  },
+  "carried_from": "0.24.0"
+}

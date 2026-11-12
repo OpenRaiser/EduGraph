@@ -1,6 +1,6 @@
 import { DependencyGraph } from './core/graph.mjs';
 import { InvertedIndex, search } from './core/bm25.mjs';
-export const SUBJECTS={mathematics:'数学',chinese:'语文',english:'英语',physics:'物理',chemistry:'化学',biology:'生物',history:'历史',geography:'地理',politics:'道德与法治',science:'科学'};
+export const SUBJECTS={mathematics:'数学',chinese:'语文',english:'英语',physics:'物理',chemistry:'化学',biology:'生物',history:'历史',geography:'地理',politics:'道德与法治',science:'科学','information-technology':'信息技术',music:'音乐','fine-arts':'美术',arts:'艺术'};
 export const STAGES={primary:'小学',junior:'初中',senior:'高中'};
 export function createModel(data,indexData){
   const nodes=data.nodes.map((n,id)=>({...n,id}));
@@ -24,6 +24,17 @@ export function findNodes(model,query,{subject='',stage='',kind='knowledge_point
   return result;
 }
 export function degree(model,key){return(model.graph.prerequisites.get(key)?.length??0)+(model.graph.successors.get(key)?.length??0);}
+export function pathEvidence(model,key){
+  const incoming=model.graph.prerequisites.get(key)??[];
+  const ancestors=new Set([key]),pending=[key];
+  while(pending.length){
+    for(const edge of model.graph.prerequisites.get(pending.pop())??[]){
+      if(!ancestors.has(edge.to)){ancestors.add(edge.to);pending.push(edge.to);}
+    }
+  }
+  const candidatePrerequisites=model.edges.filter(e=>e.type==='PREREQUISITE'&&ancestors.has(model.nodes[e.from].key)&&ancestors.has(model.nodes[e.to].key)&&['candidate','draft'].includes(e.status)).length;
+  return{hasPrerequisites:incoming.length>0,candidatePrerequisites};
+}
 export function neighborhood(model,key,{depth=2,direction='both',limit=52}={}){
   const root=model.byKey.get(key);
   if(!root) return{nodes:[],edges:[],total:0,truncated:false};
@@ -61,4 +72,4 @@ export function orderChapters(chapters,textbookId){
   for(const c of scope)if(!seen.has(c.chapter_id))out.push({...c,orderPath:[c.order]});
   return out;
 }
-export function statusLabel(status){return({reviewed:'已审核',human_reviewed:'人工审核',machine_reviewed:'机器审核',draft:'待审核',auto_matched:'自动匹配',verified:'已核验',accepted:'已接受'})[status]??status??'未标注';}
+export function statusLabel(status){return({reviewed:'已审核',human_reviewed:'人工审核',machine_reviewed:'机器审核',draft:'待审核',candidate:'先修候选',auto_matched:'自动匹配',verified:'已核验',accepted:'已接受'})[status]??status??'未标注';}
