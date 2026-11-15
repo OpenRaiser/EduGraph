@@ -29,7 +29,9 @@ const manifest=await json('data/manifest.json');
 const configured=JSON.parse(await readFile(new URL('../data/release.json',import.meta.url),'utf8'));
 assert.equal(manifest.version,configured.version,'The site is serving an older data release');
 assert.match(configured.version,/^\d+\.\d+\.\d+$/);
-const sourceManifest=JSON.parse(execFileSync('tar',['-xOf',fileURLToPath(new URL(`../data/edugraph-v${configured.version}.tar.gz`,import.meta.url)),`v${configured.version}/manifest.json`],{encoding:'utf8',maxBuffer:16*1024*1024}));
+const sourceArchive=fileURLToPath(new URL(`../data/edugraph-v${configured.version}.tar.gz`,import.meta.url));
+const readSource=resource=>execFileSync('tar',['-xOf',sourceArchive,`v${configured.version}/${resource}`],{encoding:'utf8',maxBuffer:16*1024*1024});
+const sourceManifest=JSON.parse(readSource('manifest.json'));
 assert.deepEqual(manifest.counts,sourceManifest.counts);
 assert.deepEqual(new Set(manifest.scopes.map(s=>`${s.subject}/${s.stage}`)),new Set(Object.keys(sourceManifest.counts.keypoint_partitions)));
 assert.ok(manifest.scopes.every(s=>SUBJECTS[s.subject]));
@@ -38,7 +40,13 @@ assert.equal(manifest.expansion_status,configured.expansionStatus??sourceManifes
 const [graph,index,primary,standards]=await Promise.all(['data/graph.json','data/search.json','data/resources/mathematics/primary.json','data/standards.json'].map(json));
 const model=createModel(graph,index);
 assert.equal(model.nodes.length,manifest.counts.nodes_total);
-assert.equal(standards.filter(s=>typeof s.text==='string').length,manifest.counts.standard_items);
+// The release counts all curriculum nodes, including themes without requirement text.
+// Verify their IDs and requirement text against the source archive instead of dropping themes.
+const sourceStandards=readSource('standards/nodes.jsonl').split(/\r?\n/).filter(Boolean).map(JSON.parse);
+assert.equal(standards.length,manifest.counts.standard_items);
+assert.deepEqual(standards.map(s=>({id:s.id,text:s.text})),sourceStandards.map(s=>({id:s.id,text:s.text})));
+const sourceCovers=readSource('standards-alignment/covers.jsonl').split(/\r?\n/).filter(Boolean).map(JSON.parse);
+const deployedCovers=[];
 const fraction=findNodes(model,'分数',{subject:'mathematics',stage:'primary'})[0];
 assert.equal(fraction.name,'分数');
 assert.ok(primary.concepts[fraction.id].exercises.length>0);
@@ -49,19 +57,22 @@ for(const scope of manifest.scopes){
   const scopedConcepts=model.nodes.filter(n=>n.subject===scope.subject&&n.stage===scope.stage&&n.node_kind==='knowledge_point');
   assert.equal(scopedConcepts.length,scope.concepts);assert.equal(shard.textbooks.length,scope.textbooks);
   const records=Object.values(shard.concepts);
+  for(const [id,record] of Object.entries(shard.concepts))for(const link of record.standards)deployedCovers.push({...link,to:model.nodes[Number(id)].key});
   assert.equal(new Set(records.flatMap(r=>r.keypoints.map(k=>k.key))).size,scope.keypoints);
   assert.equal(new Set(records.flatMap(r=>r.exercises.map(e=>e.key))).size,scope.exercises);
   assert.equal(records.reduce((n,r)=>n+r.teaches.length,0),scope.teaches);
   if(!scope.textbooks){assert.deepEqual(shard.chapters,[]);assert.ok(records.every(r=>!r.teaches.length));}
   const sample=scopedConcepts[0];
   assert.ok(findNodes(model,sample.name,{subject:scope.subject,stage:scope.stage}).some(n=>n.key===sample.key));
-  assert.ok(shard.concepts[sample.id].standards.length>0);
   if(scope.subject==='information-technology'){
     const found=findNodes(model,'数据编码',{subject:scope.subject,stage:scope.stage})[0],entry=shard.concepts[found.id];
     assert.equal(found.name,'数据编码');assert.ok(entry.keypoints.length>0);assert.ok(entry.exercises.length>0);assert.ok(entry.teaches.length>0);
     assert.ok(shard.textbooks.every(b=>b.grade===null&&b.volume_label));
   }
 }
+const coverSignatures=rows=>rows.map(({from,to,score,method,review_status})=>JSON.stringify({from,to,score,method,review_status})).sort();
+assert.equal(deployedCovers.length,manifest.counts.covers_edges);
+assert.deepEqual(coverSignatures(deployedCovers),coverSignatures(sourceCovers),'Curriculum links differ from the source release');
 for(const file of ['app.mjs','model.mjs','network.mjs','covers.mjs','hero.mjs','textbook-views.mjs','styles.css','learning.css','core/graph.mjs','core/bm25.mjs','core/tokenize.mjs','assets/figure-2.png','assets/figure-3.png','assets/covers/catalog.json','assets/covers/NOTICE.txt']){
   const deployed=await get(file),source=await readFile(new URL('../web/'+file,import.meta.url));
   assert.equal(createHash('sha256').update(deployed).digest('hex'),createHash('sha256').update(source).digest('hex'),`${file}: deployed content differs from source`);
