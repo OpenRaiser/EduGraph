@@ -1,6 +1,6 @@
 import { DependencyGraph } from './core/graph.mjs';
 import { InvertedIndex, search } from './core/bm25.mjs';
-export const SUBJECTS={mathematics:'数学',chinese:'语文',english:'英语',physics:'物理',chemistry:'化学',biology:'生物',history:'历史',geography:'地理',politics:'道德与法治',science:'科学','information-technology':'信息技术',music:'音乐','fine-arts':'美术',arts:'艺术'};
+export const SUBJECTS={mathematics:'数学',chinese:'语文',english:'英语',physics:'物理',chemistry:'化学',biology:'生物',history:'历史',geography:'地理',politics:'道德与法治',science:'科学','information-technology':'信息技术',music:'音乐','fine-arts':'美术',arts:'艺术','general-technology':'通用技术','physical-education':'体育与健康',japanese:'日语',russian:'俄语'};
 export const STAGES={primary:'小学',junior:'初中',senior:'高中'};
 export function createModel(data,indexData){
   const nodes=data.nodes.map((n,id)=>({...n,id}));

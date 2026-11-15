@@ -181,7 +181,7 @@ function renderPath(){
 }
 function populateAbout(){
   const c=manifest.counts,subjectCount=new Set(manifest.scopes.map(s=>s.subject)).size;$('#sidebar-stat').textContent=`${num(c.knowledge_points)} concepts · ${subjectCount} subjects`;
-  $('#landscape-description').textContent=`当前公开数据覆盖 ${subjectCount} 个学科。小学、初中与高中分片按实际收录范围提供；新增信息技术、音乐、美术、艺术目前为高中首批。`;
+  $('#landscape-description').textContent=`当前公开数据覆盖 ${subjectCount} 个学科、${manifest.scopes.length} 个学科与学段分区。各分区按实际收录范围提供知识点、讲解、习题与关联资源。`;
   $('#publication-note').hidden=manifest.publication_status!=='public-preview';
   $('#hero-stats').innerHTML=[[c.knowledge_points,'CONCEPTS'],[new Set(manifest.scopes.map(s=>s.subject)).size,'SUBJECTS'],[new Set(manifest.scopes.map(s=>s.stage)).size,'LEARNING STAGES']].map(([value,label])=>`<div><strong>${num(value)}</strong><span>${label}</span></div>`).join('');
   renderHero($('#hero-network'),model);
