@@ -117,7 +117,7 @@ await json('data/standards.json',standards.map(s=>pick(s,['id','text','subject',
 const index = new InvertedIndex();
 for(const n of nodes) index.addDoc({key:n.key,name:n.name,aliases:n.aliases,levelPath:n.level_path});
 await json('data/search.json', index.serialize());
-await json('data/manifest.json',{version:manifest.graph_version,publication_status:manifest.publication_status,expansion_status:manifest.expansion_status,counts:manifest.counts,coverage:manifest.coverage,sourceViews:sourceIndex,scopes:summary,defaultKey:nodes.find(n=>n.name==='分数'&&n.stage==='primary')?.key,generatedAt:new Date().toISOString()});
+await json('data/manifest.json',{version:manifest.graph_version,publication_status:release.publicationStatus??manifest.publication_status,expansion_status:release.expansionStatus??manifest.expansion_status,counts:manifest.counts,coverage:manifest.coverage,review_status:manifest.review_status,sourceViews:sourceIndex,scopes:summary,defaultKey:nodes.find(n=>n.name==='分数'&&n.stage==='primary')?.key,generatedAt:new Date().toISOString()});
 await mkdir(path.join(out,'downloads'),{recursive:true});
 const archive = path.join(out,'downloads',`edugraph-v${manifest.graph_version}.tar.gz`);
 execFileSync('tar',['-czf',archive,'-C',path.dirname(source),path.basename(source),'-C',path.join(root,'data'),release.sourceViews,'-C',root,'LICENSE-DATA','DATA_CARD.md'],{stdio:'pipe'});

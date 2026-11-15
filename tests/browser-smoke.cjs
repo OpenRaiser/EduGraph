@@ -10,6 +10,7 @@ const assert=require('node:assert/strict');
   const base='http://127.0.0.1:4173/EduGraph/';
   await page.goto(base);await page.locator('#detail-heading h2').filter({hasText:'分数'}).waitFor();
   const manifest=await (await page.request.get(base+'data/manifest.json')).json();
+  const graph=await (await page.request.get(base+'data/graph.json')).json();
   await page.getByRole('heading',{name:'分数的含义',exact:true}).waitFor();
   assert.ok(await page.locator('.graph-node').count()>8);
   assert.equal(await page.locator('#explorer').isVisible(),true);
@@ -60,7 +61,7 @@ const assert=require('node:assert/strict');
   assert.equal(await page.locator('[data-hero-node]').count(),7);
   assert.equal(await page.locator('[data-hero-edge]').count(),9);
   assert.ok((await page.locator('#hero-stats').innerText()).includes(manifest.counts.knowledge_points.toLocaleString('en-US')));
-  assert.equal(await page.locator('#publication-note').isVisible(),true);
+  assert.equal(await page.locator('#publication-note').isVisible(),manifest.publication_status==='public-preview');
   await page.screenshot({path:path.join(out,'homepage.png')});
   await page.locator('[data-hero-tab="textbooks"]').click();
   await page.locator('#explorer').waitFor({state:'visible'});await page.locator('#detail-content .textbook-cover').first().waitFor();
@@ -70,24 +71,44 @@ const assert=require('node:assert/strict');
   await page.locator('img[src="assets/figure-3.png"]').scrollIntoViewIfNeeded();await page.waitForFunction(()=>document.querySelector('img[src="assets/figure-3.png"]').complete);
   await page.screenshot({path:path.join(out,'dataset-about.png'),fullPage:true});
   const dl=await page.locator('#download-about').getAttribute('href');assert.equal((await page.request.get(new URL(dl,base).href)).status(),200);
-  // Newly added subjects remain discoverable even before their resources arrive.
-  await page.locator('#nav-explore').click();await page.locator('#browse-results').click();await page.locator('#stage').selectOption('senior');
-  assert.equal(await page.locator('#subject option').count(),15);
-  for(const [subject,name]of [['music','音高'],['fine-arts','中国画'],['arts','艺术起源']]){
-    await page.locator('#subject').selectOption(subject);await page.locator('#search').fill(name);
-    const found=page.locator('#result-list .result-item').filter({has:page.locator('h3',{hasText:name})}).first();await found.waitFor();await found.click();
-    await page.locator('#detail-heading h2').filter({hasText:name}).waitFor();
-    await page.locator('[data-tab="keypoints"]').click();await page.locator('[data-open-standards]').waitFor();
+  // Every expanded subject/stage is searchable; node and resource review states remain distinct.
+  await page.locator('#nav-explore').click();await page.locator('#browse-results').click();
+  assert.equal(await page.locator('#subject option').count(),new Set(manifest.scopes.map(s=>s.subject)).size+1);
+  const expanded=['information-technology','music','fine-arts','arts','general-technology','physical-education','japanese','russian'];
+  for(const scope of manifest.scopes.filter(s=>expanded.includes(s.subject))){
+    const sample=graph.nodes.find(n=>n.subject===scope.subject&&n.stage===scope.stage&&n.node_kind==='knowledge_point');
+    await page.locator('#subject').selectOption(scope.subject);await page.locator('#stage').selectOption(scope.stage);await page.locator('#search').fill(sample.name);
+    const found=page.locator('#result-list .result-item').filter({has:page.getByRole('heading',{name:sample.name,exact:true})}).first();await found.waitFor();await found.click();
+    await page.locator('#detail-heading').getByRole('heading',{name:sample.name,exact:true}).waitFor();
     assert.match(await page.locator('#detail-heading').innerText(),/待审核/);
-    await page.locator('[data-open-standards]').click();await page.locator('.standard-card').first().waitFor();
-    await page.locator('#open-path').click();await page.locator('#path-content .empty-state').waitFor();
-    assert.match(await page.locator('#path-content').innerText(),/尚无先修关系记录/);assert.equal(await page.locator('.path-step').count(),0);
-    await page.locator('#close-path').click();
+    await page.locator('[data-tab="keypoints"]').click();await page.locator('#detail-content .resource-card').first().waitFor();
+    assert.match(await page.locator('#detail-content').innerText(),/机器审核/);assert.match(await page.locator('#detail-content').innerText(),/模型生成/);
+    await page.locator('[data-tab="exercises"]').click();await page.locator('.exercise-solution summary').first().click();
+    assert.match(await page.locator('#detail-content').innerText(),/机器审核/);assert.ok((await page.locator('.exercise-solution').first().innerText()).length>20);
+    await page.locator('[data-tab="standards"]').click();await page.locator('.standard-card').first().waitFor();
+    if(!scope.textbooks){
+      await page.locator('[data-tab="textbooks"]').click();await page.locator('#detail-content .empty-state').waitFor();
+      assert.match(await page.locator('#detail-content').innerText(),/尚无公开教材映射/);
+      await page.locator('#view-textbooks').click();await page.locator('#textbook-stage .empty-state').waitFor();
+      assert.match(await page.locator('#textbook-stage .empty-state').innerText(),/暂无教材映射/);
+      await page.locator('#view-network').click();
+    }
+    if(scope.subject==='japanese')await page.screenshot({path:path.join(out,'expanded-subject.png'),fullPage:true});
   }
-  await page.locator('#subject').selectOption('information-technology');await page.locator('#search').fill('数据编码');
+  // A missing dependency stays an explicit empty state, rather than a fabricated learning sequence.
+  const prerequisiteTargets=new Set(graph.edges.filter(e=>e[2]==='PREREQUISITE').map(e=>e[1]));
+  const unlinked=graph.nodes.find((n,id)=>expanded.includes(n.subject)&&n.node_kind==='knowledge_point'&&!prerequisiteTargets.has(id));
+  await page.goto(base+'#/concept/'+encodeURIComponent(unlinked.key));await page.locator('#detail-heading').getByRole('heading',{name:unlinked.name,exact:true}).waitFor();
+  await page.locator('#open-path').click();await page.locator('#path-content .empty-state').waitFor();
+  assert.match(await page.locator('#path-content').innerText(),/尚无先修关系记录/);assert.equal(await page.locator('.path-step').count(),0);await page.locator('#close-path').click();
+  const candidate=graph.edges.find(e=>e[2]==='PREREQUISITE'&&e[4]==='candidate');assert.ok(candidate);
+  await page.goto(base+'#/concept/'+encodeURIComponent(graph.nodes[candidate[1]].key));await page.locator('#detail-heading').getByRole('heading',{name:graph.nodes[candidate[1]].name,exact:true}).waitFor();
+  await page.locator('#open-path').click();assert.match(await page.locator('#path-description').innerText(),/待审核候选/);await page.locator('#close-path').click();
+  // Information technology module volumes have real mappings and no fabricated grade numbers.
+  await page.locator('#subject').selectOption('information-technology');await page.locator('#stage').selectOption('senior');await page.locator('#search').fill('数据编码');
   await page.locator('#result-list .result-item').first().filter({hasText:'数据编码'}).waitFor();await page.locator('#result-list .result-item').first().click();
   await page.locator('#detail-heading h2').filter({hasText:'数据编码'}).waitFor();await page.locator('[data-tab="keypoints"]').click();
-  await page.locator('#detail-content .resource-card').first().waitFor();assert.equal(await page.locator('#detail-content .resource-card').count(),2);
+  await page.locator('#detail-content .resource-card').first().waitFor();assert.match(await page.locator('#detail-content').innerText(),/机器审核/);
   await page.locator('[data-tab="textbooks"]').click();await page.locator('#detail-content [data-book]').first().waitFor();
   assert.doesNotMatch(await page.locator('#detail-content').innerText(),/null|undefined/);
   // Deep links and prefix paths must work on GitHub project Pages.
@@ -111,6 +132,6 @@ const assert=require('node:assert/strict');
   await page.waitForFunction(()=>Math.abs(document.querySelector('#network').viewBox.baseVal.width-document.querySelector('#network').clientWidth)<1);
   await page.screenshot({path:path.join(out,'explorer-desktop.png'),fullPage:true});
   assert.deepEqual(errors,[]);assert.deepEqual(badRequests,[]);
-  const report={passed:true,features:['real-data-load','graph-neighborhood','graph-node-navigation','exercise-answer','standards','six-publisher-views','matched-textbook-covers-and-sources','search-filters','learning-path','known-state','topic-tree','about-figures','dataset-download','deep-link','node-export','mobile-width','light-learning-theme','real-hero-graph-and-navigation','reduced-motion','four-new-subjects','draft-resource-availability','missing-prerequisite-path','module-textbook-labels'],pageErrors:errors,failedRequests:badRequests};
+  const report={passed:true,features:['real-data-load','graph-neighborhood','graph-node-navigation','exercise-answer','standards','six-publisher-views','matched-textbook-covers-and-sources','search-filters','learning-path','known-state','topic-tree','about-figures','dataset-download','deep-link','node-export','mobile-width','light-learning-theme','real-hero-graph-and-navigation','reduced-motion','all-expanded-subject-stage-search','separate-node-and-resource-review-status','empty-textbook-mapping','candidate-path-evidence','missing-prerequisite-path','module-textbook-labels'],pageErrors:errors,failedRequests:badRequests};
   await fs.writeFile(path.join(out,'browser-report.json'),JSON.stringify(report,null,2));console.log(JSON.stringify(report));await browser.close();
 })().catch(error=>{console.error(error);process.exit(1);});

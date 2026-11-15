@@ -1,51 +1,79 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {readFile,readdir} from 'node:fs/promises';
+import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {createModel,findNodes,neighborhood,pathEvidence,orderChapters,SUBJECTS,statusLabel} from '../web/model.mjs';
 const read=async p=>JSON.parse(await readFile(new URL('../dist/'+p,import.meta.url),'utf8'));
 const [graph,index,manifest]=await Promise.all([read('data/graph.json'),read('data/search.json'),read('data/manifest.json')]);
 const model=createModel(graph,index);
+const sourceRoot=new URL(`../data/open/v${manifest.version}/`,import.meta.url);
+const release=JSON.parse(await readFile(new URL('../data/release.json',import.meta.url),'utf8'));
+const sourceManifest=JSON.parse(await readFile(new URL('manifest.json',sourceRoot),'utf8'));
+const sourceRows=async path=>(await readFile(new URL(path,sourceRoot),'utf8')).split(/\r?\n/).filter(Boolean).map(JSON.parse);
+const expansionSubjects=['information-technology','music','fine-arts','arts','general-technology','physical-education','japanese','russian'];
 const fraction=model.nodes.find(n=>n.name==='分数'&&n.stage==='primary');
 const conversion=model.nodes.find(n=>n.name==='小数与分数的互化'&&n.stage==='primary');
 const decimal=model.nodes.find(n=>n.name==='小数'&&n.stage==='primary');
-test('The public graph matches the complete release and has no prerequisite cycles',()=>{
-  assert.equal(model.nodes.length,7113);assert.equal(model.nodes.filter(n=>n.node_kind!=='topic').length,5749);
-  assert.equal(model.edges.filter(e=>e.type==='PREREQUISITE').length,4994);
-  assert.equal(model.edges.filter(e=>e.type==='REFINES').length,6897);
+test('The public graph matches the release manifest and has no prerequisite cycles',()=>{
+  assert.equal(manifest.version,release.version);
+  assert.deepEqual(manifest.counts,sourceManifest.counts);
+  assert.equal(model.nodes.length,sourceManifest.counts.nodes_total);
+  assert.equal(model.nodes.filter(n=>n.node_kind==='knowledge_point').length,sourceManifest.counts.knowledge_points);
+  assert.equal(model.nodes.filter(n=>n.node_kind==='topic').length,sourceManifest.counts.topic_nodes);
+  assert.equal(model.edges.filter(e=>e.type==='PREREQUISITE').length,sourceManifest.counts.prerequisite_edges);
+  assert.equal(model.edges.filter(e=>e.type==='REFINES').length,sourceManifest.counts.refines_edges);
+  assert.deepEqual(new Set(manifest.scopes.map(s=>`${s.subject}/${s.stage}`)),new Set(model.nodes.map(n=>`${n.subject}/${n.stage}`)));
+  assert.ok(manifest.scopes.every(s=>SUBJECTS[s.subject]));
+  assert.equal(manifest.publication_status,release.publicationStatus??sourceManifest.publication_status);
+  assert.equal(manifest.expansion_status,release.expansionStatus??sourceManifest.expansion_status);
   assert.equal(model.graph.findDanglingEdges().length,0);assert.equal(model.graph.findCycles().length,0);
 });
 
-test('New subject drafts retain curriculum links, explicit empty arts resources and usable Chinese search',async()=>{
-  assert.equal(new Set(manifest.scopes.map(s=>s.subject)).size,14);assert.equal(manifest.scopes.length,28);
-  assert.equal(manifest.publication_status,'public-preview');
-  for(const [subject,name,count] of [['music','音高',92],['fine-arts','中国画',157],['arts','艺术起源',62]]){
-    assert.ok(SUBJECTS[subject]);
-    const result=findNodes(model,name,{subject,stage:'senior'});assert.equal(result[0].name,name);
-    const concepts=model.nodes.filter(n=>n.subject===subject&&n.node_kind==='knowledge_point');assert.equal(concepts.length,count);
-    const shard=await read(`data/resources/${subject}/senior.json`);assert.deepEqual(shard.textbooks,[]);assert.deepEqual(shard.chapters,[]);
-    for(const node of concepts){
-      assert.equal(node.review_status,'draft');const entry=shard.concepts[node.id];assert.ok(entry.standards.length>0);
-      assert.deepEqual(entry.keypoints,[]);assert.deepEqual(entry.exercises,[]);assert.deepEqual(entry.teaches,[]);
-      assert.equal(pathEvidence(model,node.key).hasPrerequisites,false);
-      assert.ok(neighborhood(model,node.key).edges.some(e=>e.type==='REFINES'));
+test('Expanded subjects preserve source resources, curriculum links and distinct review statuses',async()=>{
+  let checkedScopes=0;
+  for(const scope of manifest.scopes.filter(s=>expansionSubjects.includes(s.subject))){
+    const name=`${scope.subject}/${scope.stage}`;
+    const [nodes,keypoints,exercises,edges,shard]=await Promise.all([
+      sourceRows(`knowledge-points/${name}/nodes.jsonl`),sourceRows(`keypoints/${name}/keypoints.jsonl`),
+      sourceRows(`exercises/${name}/exercises.jsonl`),sourceRows(`knowledge-points/${name}/edges.jsonl`),read(`data/resources/${name}.json`)]);
+    const sourcePoints=new Map(keypoints.map(k=>[k.key,k])),sourceExercises=new Map(exercises.map(e=>[e.key,e]));
+    const concepts=nodes.filter(n=>n.node_kind==='knowledge_point');assert.equal(concepts.length,scope.concepts);
+    assert.equal(shard.textbooks.length,scope.textbooks);
+    if(!scope.textbooks){assert.deepEqual(shard.chapters,[]);assert.ok(Object.values(shard.concepts).every(e=>!e.teaches.length));}
+    const nodeKeys=new Set(nodes.map(n=>n.key));
+    const projectedEdges=model.edges.filter(e=>nodeKeys.has(model.nodes[e.from].key)||nodeKeys.has(model.nodes[e.to].key));
+    for(const edge of edges){
+      const projected=projectedEdges.find(e=>model.nodes[e.from].key===edge.from&&model.nodes[e.to].key===edge.to&&e.type===edge.type);
+      assert.ok(projected,`${name}: edge preserved`);
+      if(edge.type==='PREREQUISITE')assert.equal(projected.status,edge.review_status);
     }
+    for(const sourceNode of concepts){
+      const node=model.byKey.get(sourceNode.key),entry=shard.concepts[node.id];
+      assert.equal(node.review_status,sourceNode.review_status);assert.ok(entry.standards.length>0);
+      assert.ok(model.graph.parent.has(node.key));assert.ok(entry.keypoints.length>0);assert.ok(entry.exercises.length>0);
+      for(const [rows,source]of [[entry.keypoints,sourcePoints],[entry.exercises,sourceExercises]])for(const row of rows){
+        assert.equal(row.review_status,source.get(row.key).review_status);assert.equal(row.authored_by,source.get(row.key).authored_by);
+      }
+    }
+    assert.ok(findNodes(model,concepts[0].name,{subject:scope.subject,stage:scope.stage}).some(n=>n.key===concepts[0].key));
+    checkedScopes++;
   }
+  assert.ok(checkedScopes>=expansionSubjects.length);
+  for(const [subject,name]of [['general-technology','农业信息'],['physical-education','健身健美操基本动作原理'],['japanese','中外文化比较'],['russian','中国基本国情']]){
+    assert.equal(findNodes(model,name,{subject,stage:'senior'})[0].name,name);
+  }
+  assert.equal(statusLabel('draft'),'待审核');assert.equal(statusLabel('machine_reviewed'),'机器审核');assert.equal(statusLabel('candidate'),'先修候选');
 });
 
-test('Information technology retains authored drafts, module textbooks and candidate path evidence',async()=>{
-  const shard=await read('data/resources/information-technology/senior.json');assert.equal(shard.textbooks.length,48);
-  const concepts=model.nodes.filter(n=>n.subject==='information-technology'&&n.node_kind==='knowledge_point');assert.equal(concepts.length,169);
-  let points=0,exercises=0,teaches=0,withCandidate=0;
-  for(const n of concepts){
-    const r=shard.concepts[n.id];assert.equal(r.keypoints.length,2);assert.equal(r.exercises.length,1);
-    assert.ok(r.keypoints.every(k=>k.review_status==='draft'));assert.ok(r.exercises.every(e=>e.review_status==='draft'));
-    points+=r.keypoints.length;exercises+=r.exercises.length;teaches+=r.teaches.length;
-    withCandidate+=Number(pathEvidence(model,n.key).candidatePrerequisites>0);
-  }
-  assert.equal(points,338);assert.equal(exercises,169);assert.equal(teaches,396);assert.ok(withCandidate>0);
-  assert.equal(statusLabel('candidate'),'先修候选');assert.ok(shard.textbooks.every(b=>b.grade===null&&b.volume_label));
-  assert.equal(findNodes(model,'数据编码',{subject:'information-technology',stage:'senior'})[0].name,'数据编码');
+test('Information technology keeps module textbook labels and candidate path evidence',async()=>{
+  const shard=await read('data/resources/information-technology/senior.json');
+  const scope=manifest.scopes.find(s=>s.subject==='information-technology'&&s.stage==='senior');
+  const concepts=model.nodes.filter(n=>n.subject==='information-technology'&&n.node_kind==='knowledge_point');
+  assert.equal(concepts.length,scope.concepts);assert.equal(shard.textbooks.length,scope.textbooks);
+  assert.ok(shard.textbooks.every(b=>b.grade===null&&b.volume_label));
+  assert.ok(concepts.some(n=>pathEvidence(model,n.key).candidatePrerequisites>0));
+  const coding=findNodes(model,'数据编码',{subject:'information-technology',stage:'senior'})[0];
+  assert.equal(coding.name,'数据编码');assert.ok(shard.concepts[coding.id].teaches.length>0);
 });
 test('Chinese retrieval finds the exact concept and respects subject/stage filters',()=>{
   const found=findNodes(model,'分数',{subject:'mathematics',stage:'primary'});assert.equal(found[0].key,fraction.key);
