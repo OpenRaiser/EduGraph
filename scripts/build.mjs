@@ -75,12 +75,19 @@ const scopes = [...new Set(nodes.map(n=>`${n.subject}/${n.stage}`))].sort();
 const summary = [];
 let exercisesTotal=0, keypointsTotal=0, chaptersTotal=0, textbooksTotal=0, teachesTotal=0;
 for (const scope of scopes) {
+  const textbookLines = async name => {
+    try { return await readLines(path.join(source,'textbook-alignment',scope,`${name}.jsonl`)); }
+    catch (error) {
+      if (error.code === 'ENOENT' && (manifest.counts.textbook_partitions[scope] ?? 0) === 0) return [];
+      throw error;
+    }
+  };
   const [keypoints,exercises,textbooks,chapters,teaches] = await Promise.all([
     readLines(path.join(source,'keypoints',scope,'keypoints.jsonl')),
     readLines(path.join(source,'exercises',scope,'exercises.jsonl')),
-    readLines(path.join(source,'textbook-alignment',scope,'textbooks.jsonl')),
-    readLines(path.join(source,'textbook-alignment',scope,'chapters.jsonl')),
-    readLines(path.join(source,'textbook-alignment',scope,'teaches.jsonl')),
+    textbookLines('textbooks'),
+    textbookLines('chapters'),
+    textbookLines('teaches'),
   ]);
   exercisesTotal+=exercises.length; keypointsTotal+=keypoints.length;
   chaptersTotal+=chapters.length; textbooksTotal+=textbooks.length; teachesTotal+=teaches.length;
