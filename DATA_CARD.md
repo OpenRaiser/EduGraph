@@ -1,6 +1,6 @@
-# EduGraph public data — v0.28.0 public preview
+# EduGraph public data — v0.29.0 public preview
 
-The download contains the EduGraph main graph (`v0.28.0/`), independent ChinaTextbook source catalog views (`source-views-v0.28.0/`), this data card, and the data license. This is a **public preview**. Curriculum-derived Concepts, prerequisite candidates, automatically matched curriculum links, and machine-reviewed learning resources retain their respective provenance and review status. Public availability and machine review do not certify independent teacher assessment.
+The download contains the EduGraph main graph (`v0.29.0/`), independent ChinaTextbook source catalog views (`source-views-v0.29.0/`), this data card, and the data license. This is a **public preview**. Curriculum-derived Concepts, prerequisite candidates, automatically matched curriculum links, and machine-reviewed learning resources retain their respective provenance and review status. Public availability and machine review do not certify independent teacher assessment.
 
 Source views link to existing textbook records; they are not additional, disjoint textbooks to add to the main graph totals.
 
@@ -8,15 +8,15 @@ Source views link to existing textbook records; they are not additional, disjoin
 
 | Resource | Count |
 |---|---:|
-| Concepts | 8,892 |
+| Concepts | 8,934 |
 | Topics | 1,676 |
-| REFINES | 10,257 |
-| PREREQUISITE | 6,443 |
-| KeyPoints | 19,445 |
-| Exercises | 10,730 |
-| StandardItems | 5,445 |
+| REFINES | 10,299 |
+| PREREQUISITE | 6,447 |
+| KeyPoints | 19,529 |
+| Exercises | 10,772 |
+| StandardItems | 5,463 |
 | Curriculum themes / subthemes | 255 / 681 |
-| COVERS | 13,427 |
+| COVERS | 13,557 |
 | Textbook volumes | 1,161 |
 | Textbook chapters | 12,607 |
 | TEACHES | 23,411 |
@@ -24,13 +24,23 @@ Source views link to existing textbook records; they are not additional, disjoin
 | Learning stages | 3 |
 | Subject/stage partitions | 41 |
 
-The StandardItem count includes only records with `type: "StandardItem"`. The manifest's `counts.standard_items` counts all 6,381 curriculum nodes, including the 255 ContentThemes and 681 ContentSubThemes shown separately above.
+The StandardItem count includes only records with `type: "StandardItem"`. The manifest's `counts.standard_items` counts all 6,399 curriculum nodes, including the 255 ContentThemes and 681 ContentSubThemes shown separately above.
 
 The graph covers mathematics, Chinese, English, physics, chemistry, biology, history, geography, politics, science, information technology, music, fine arts, integrated arts, Japanese, Russian, physical education and health, and general technology. Japanese and Russian cover **junior and senior secondary education**. Physical education and health, music, and fine arts include primary, junior-secondary, and senior-secondary partitions; integrated arts includes junior and senior secondary. General technology covers senior secondary education. These totals do not imply that every subject spans all three stages.
 
-## Additions in v0.28.0: curriculum-driven expansion
+## Additions in v0.29.0: verified curriculum recovery
 
-This release processes **1,580 additional curriculum requirements** through the original construction workflow and adds **1,703 Concepts, 166 Topics, 3,686 KeyPoints, 1,703 exercises, 510 PREREQUISITE edges, 3,125 COVERS edges, and 1,834 REFINES edges** relative to v0.27.0. Curriculum organization adds 151 ContentThemes and 561 ContentSubThemes.
+Relative to v0.28.0, this release adds **42 Concepts, 84 KeyPoints, 42 exercises, 18 StandardItems, 130 COVERS edges, 42 REFINES edges, and four PREREQUISITE edges**. The 42 Concepts comprise 36 in primary/junior English, three in primary science, and three in primary/junior politics. No Topics, textbooks, chapters, or TEACHES edges are added in this batch.
+
+All 42 new Concepts have curriculum references, explanations, and exercises. The original generation, per-item model review, appeal, repair, and promotion stages produced the new learning resources, all marked `machine_reviewed`. Reviews used `gpt-6.1-sol`, with `gpt-6-sol` for the independent appeal where needed. One rejected exercise was regenerated and reviewed rather than retained. Its compact public prompt-version label maps to the unchanged prompt hash and private run evidence.
+
+The curriculum evidence comes from the 2022 compulsory-education English, science, and morality-and-law standards. The 18 additional StandardItems include a source-verified primary-stage projection for an existing requirement previously recorded under junior secondary. The new primary Concept uses the verified projection; historical records and links are retained. COVERS additions include both new-Concept bindings and verified links to existing Concepts.
+
+Prerequisite generation used the full graph as context and restricted proposals to edges touching the 42 new Concepts. Both within-theme and cross-theme generation completed, followed by individual semantic review and the original graph checks. All 6,443 historical prerequisite edges are retained, together with four new edges. Public new-node and edge review states remain `draft` and `candidate`, respectively; agent review is recorded as machine review, not teacher approval.
+
+## Historical additions in v0.28.0: curriculum-driven expansion
+
+That release processed **1,580 additional curriculum requirements** through the original construction workflow and added **1,703 Concepts, 166 Topics, 3,686 KeyPoints, 1,703 exercises, 510 PREREQUISITE edges, 3,125 COVERS edges, and 1,834 REFINES edges** relative to v0.27.0. Curriculum organization added 151 ContentThemes and 561 ContentSubThemes.
 
 | Expansion scope | New Concepts | New KeyPoints | New exercises |
 |---|---:|---:|---:|
@@ -122,7 +132,7 @@ Source snapshot: [TapXWorld/ChinaTextbook at e2b3f62213c77bb8c33c5be355f97625ea1
 
 The earlier v0.24.0 intake matched 980 main-textbook sources within the original ten subjects. Matching used subject, school system, textbook series/editor, grade, and volume; it did not certify identical publication editions. Of these sources, 957 matched a single main-graph record and 23 retained multiple same-series edition candidates. Seventy-two activity manuals or supplementary readers were outside that intake. These are historical ten-subject intake statistics, not evidence of exhaustive coverage across the current eighteen subjects.
 
-That intake added 361 textbook records, 4,048 chapter nodes, and 1,044 TEACHES edges relative to v0.21.0. The subsequent information-technology expansion added 48 textbook records, 1,681 chapter nodes, and 396 TEACHES edges. These records are retained unchanged in v0.28.0.
+That intake added 361 textbook records, 4,048 chapter nodes, and 1,044 TEACHES edges relative to v0.21.0. The subsequent information-technology expansion added 48 textbook records, 1,681 chapter nodes, and 396 TEACHES edges. These records are retained unchanged in v0.29.0.
 
 The other 619 matched sources remain independently organized catalog views associated with existing books:
 
@@ -134,13 +144,13 @@ The other 619 matched sources remain independently organized catalog views assoc
 | Chapter nodes | 4,451 |
 | Candidate TEACHES edges | 359 |
 
-These views, chapters, and mappings originate from v0.24.0 and are **carried forward without new source-view content** in this release. The distribution directory is `source-views-v0.28.0/`; its index records v0.27.0 as the immediate `carried_from` release.
+These views, chapters, and mappings originate from v0.24.0 and are **carried forward without new source-view content** in this release. The distribution directory is `source-views-v0.29.0/`; its index records v0.28.0 as the immediate `carried_from` release.
 
 These counts overlap with the main graph's textbook coverage and must not be added to its textbook totals. Each source preserves its own chapter order. Alternative catalogs are not interleaved into a single order, and textbook order is not converted into prerequisite edges.
 
 ## Read the data
 
-Each nonempty line in a `.jsonl` file is a UTF-8 JSON object. The main graph's `manifest.json` records counts and snapshot metadata; consult its stated scope before using any coverage denominator. The following graph paths are relative to `v0.28.0/`:
+Each nonempty line in a `.jsonl` file is a UTF-8 JSON object. The main graph's `manifest.json` records counts and snapshot metadata; consult its stated scope before using any coverage denominator. The following graph paths are relative to `v0.29.0/`:
 
 - `knowledge-points/<subject>/<stage>/nodes.jsonl`: Concepts and Topics. `node_kind` distinguishes them; `key` is their stable identifier.
 - `knowledge-points/<subject>/<stage>/edges.jsonl`: REFINES points from child to parent; PREREQUISITE points from prerequisite to successor. Some prerequisites cross stages; resolve endpoints against all node partitions.
@@ -150,19 +160,19 @@ Each nonempty line in a `.jsonl` file is a UTF-8 JSON object. The main graph's `
 - `textbook-alignment/`: volume metadata, chapter structure, and chapter-to-Concept mappings (TEACHES). The public package retains chapter positions, not original chapter titles or printed numbering.
 - `keys/`, `index/`, and `changes/`: identifier governance, retrieval indexes, and release history.
 
-The archive also contains `source-views-v0.28.0/`:
+The archive also contains `source-views-v0.29.0/`:
 
 - `textbooks.jsonl`, `chapters.jsonl`, and `teaches.jsonl`: source-specific views using the existing Textbook, TextbookChapter, and TEACHES types. TEACHES targets are stable Concept keys from the main graph.
 - `source-links.jsonl`: an auxiliary index associating `source_textbook_id` with `existing_textbook_ids` in the main graph. A nullable `preferred_textbook_id` does not resolve every edition ambiguity. This index introduces no new Concept or prerequisite type.
 - `index.json`: source-view scope, counts, and integrity metadata, separate from the main graph's manifest.
 
-In the source repository, `data/open/v0.28.0/` is Git-ignored and extracted during the build. The main graph is distributed in `data/edugraph-v0.28.0.tar.gz` with a companion SHA-256 checksum, rather than as individually tracked JSONL files.
+In the source repository, `data/open/v0.29.0/` is Git-ignored and extracted during the build. The main graph is distributed in `data/edugraph-v0.29.0.tar.gz` with a companion SHA-256 checksum, rather than as individually tracked JSONL files.
 
 ## Interpretation and review status
 
 Resource presence, catalog completeness, and mapping correctness are different properties. Reading source front/back matter is not a full-text audit. Across the earlier 980-source intake, 752 sources had recovered catalog candidates; this does not establish complete catalogs for those books. Missing supported TEACHES links mean no binding has been established, not that a textbook does not teach the Concept.
 
-The Concepts added in v0.28.0 and v0.27.0, and those added or resource-completed in v0.26.0, all have explanations and exercises. Across the full inherited graph, ten historical physics Concepts still lack these resources. Historical review states are also retained: 125 KeyPoints and three exercises remain draft; these are outside this release's expansion/review scope. Existing `spot_checked` fields are inherited historical metadata, not new teacher judgments from this run.
+The Concepts added in v0.29.0, v0.28.0, and v0.27.0, and those added or resource-completed in v0.26.0, all have explanations and exercises. Across the full inherited graph, ten historical physics Concepts still lack these resources. Historical review states are also retained: 125 KeyPoints and three exercises remain draft; these are outside this release's expansion/review scope. Existing `spot_checked` fields are inherited historical metadata, not new teacher judgments from this run.
 
 New curriculum-based Concepts remain `draft`; new prerequisites remain `candidate`; COVERS links are `auto_matched`. Visible explanations and exercises in this release's review scope are `machine_reviewed`. Catalog refinements and independent source-view mappings retain their applicable draft/uncertain state. These labels describe different review stages and must not be collapsed into a claim of independent teacher verification.
 
