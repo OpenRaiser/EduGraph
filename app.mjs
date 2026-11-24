@@ -28,7 +28,7 @@ function loadCovers(){
 function bookCover(book){
   const cover=resolveCover(book,coverCatalog),label=`${publisherLabel(book)} · ${SUBJECTS[book.subject]??book.subject} · ${volumeLabel(book)}`;
   const fallback=`<span class="cover-fallback" aria-hidden="true"><i>EDUGRAPH</i><strong>${esc(SUBJECTS[book.subject]??'教材')}</strong><span>${esc(volumeLabel(book))}</span></span>`;
-  if(!cover)return`<span class="cover-wrap"><span class="cover-link" role="img" aria-label="${esc(label)}，暂无已匹配封面">${fallback}</span><span class="cover-credit">${coverCatalog?'册次信息':'教材'}</span></span>`;
+  if(!cover)return`<span class="cover-wrap"><span class="cover-link" role="img" aria-label="${esc(label)}，教材册次信息">${fallback}</span><span class="cover-credit">${coverCatalog?'册次信息':'教材'}</span></span>`;
   const title=`${label}。同出版社、学科、系列与册次的参考封面；具体印次未核验。点击查看来源。`;
   return`<span class="cover-wrap"><a class="cover-link" href="${esc(cover.source)}" target="_blank" rel="noopener noreferrer" title="${esc(title)}">${fallback}<img class="textbook-cover" src="${esc(cover.asset)}" alt="${esc(label)}教材参考封面" width="58" height="80" loading="lazy" decoding="async"></a><a class="cover-credit" href="${esc(cover.source)}" target="_blank" rel="noopener noreferrer" title="${esc(title)}">同册参考 ↗</a></span>`;
 }
@@ -107,22 +107,22 @@ async function renderDetail(){
   }else if(state.tab==='keypoints'){
     const kind={definition:'定义',property:'性质',formula:'公式',method:'方法',pitfall:'易错点',example:'示例'};
     html=r.keypoints.map(k=>`<article class="resource-card"><div class="card-label"><i></i>${esc(kind[k.kind]??k.kind)}</div><h3>${esc(k.title)}</h3><p>${esc(k.body)}</p>${reviewTags(k)}</article>`).join('');
-    if(!r.keypoints.length)html=`<div class="empty-state"><strong>讲解尚未补充</strong>这个知识点目前可查看所属主题${r.standards.length?'和课标要求':''}。${r.standards.length?'<br><button class="text-button" data-open-standards>查看课标依据 →</button>':''}</div>`;
+    if(!r.keypoints.length)html=`<div class="empty-state"><strong>本节点无独立讲解记录</strong>可查看所属主题${r.standards.length?'和课标要求':''}。${r.standards.length?'<br><button class="text-button" data-open-standards>查看课标依据 →</button>':''}</div>`;
     const direct=model.graph.successors.get(n.key)??[];
     if(direct.length)html+=`<div class="section-mini">以此为基础，可以继续学习</div>${direct.slice(0,8).map(e=>nodeLink(e.to,model.byKey.get(e.to)?.name??e.to,'related-link')).join('')}`;
   }else if(state.tab==='exercises'){
     const kinds={single_choice:'单选题',multi_choice:'多选题',fill_blank:'填空题',short_answer:'简答题',calculation:'计算题',proof:'证明题',open_ended:'开放题'};
-    html=r.exercises.map((e,i)=>`<article class="resource-card"><div class="card-label"><i></i>例题 ${String(i+1).padStart(2,'0')} · ${esc(kinds[e.question_kind]??e.question_kind)}</div><h3>${esc(e.stem)}</h3>${(e.choices??[]).map(c=>`<div class="exercise-choice">${esc(typeof c==='string'?c:`${c.label}. ${c.text}`)}</div>`).join('')}<details class="exercise-solution"><summary>查看答案与解析</summary><p><strong>答案：</strong>${esc(typeof e.answer==='object'?JSON.stringify(e.answer):e.answer)}</p><p>${esc(e.explanation)}</p></details>${reviewTags(e)}<div class="source-id">${esc(e.key)}</div></article>`).join('')||'<div class="empty-state">这个知识点尚无公开例题。</div>';
+    html=r.exercises.map((e,i)=>`<article class="resource-card"><div class="card-label"><i></i>例题 ${String(i+1).padStart(2,'0')} · ${esc(kinds[e.question_kind]??e.question_kind)}</div><h3>${esc(e.stem)}</h3>${(e.choices??[]).map(c=>`<div class="exercise-choice">${esc(typeof c==='string'?c:`${c.label}. ${c.text}`)}</div>`).join('')}<details class="exercise-solution"><summary>查看答案与解析</summary><p><strong>答案：</strong>${esc(typeof e.answer==='object'?JSON.stringify(e.answer):e.answer)}</p><p>${esc(e.explanation)}</p></details>${reviewTags(e)}<div class="source-id">${esc(e.key)}</div></article>`).join('')||'<div class="empty-state">本节点无例题记录，可查看讲解及关联知识。</div>';
   }else if(state.tab==='textbooks'){
     loadCovers();
     const books=booksForConcept();
     html='<div class="textbook-note">展示公开包中的册次、章节顺位与关联角色。顺位标签不等同于原书章节名称。</div>';
-    html+=books.map(({book,mappings,sourceMappings,sources})=>`<article class="resource-card textbook-mini"><div class="book-overview">${bookCover(book)}<div class="book-meta"><h3 class="publisher-name">${esc(publisherLabel(book))}</h3><p>${esc(volumeLabel(book))}</p><p class="book-edition">${esc(editionLabel(book))} · ${esc(SUBJECTS[book.subject])}</p></div></div>${mappings.map(({teach,chapter})=>`<div class="book-position"><span>章节顺位 ${esc(chapter.order)}</span><small>${roleName(teach.role)} · ${esc(statusLabel(teach.review_status))}${teach.uncertain?' · 待核':''}</small></div>`).join('')}${sources.length?`<p class="source-catalog-summary">另有 ${sources.length} 份 ChinaTextbook 来源目录${sourceMappings.length?` · ${sourceMappings.length} 条当前知识点候选关联`:''}</p>`:''}<button class="button" data-book="${esc(book.textbook_id)}">查看编排与来源目录 →</button></article>`).join('');
-    if(!books.length)html+='<div class="empty-state">这个知识点尚无公开教材映射。</div>';
+    html+=books.map(({book,mappings,sourceMappings,sources})=>`<article class="resource-card textbook-mini"><div class="book-overview">${bookCover(book)}<div class="book-meta"><h3 class="publisher-name">${esc(publisherLabel(book))}</h3><p>${esc(volumeLabel(book))}</p><p class="book-edition">${esc(editionLabel(book))} · ${esc(SUBJECTS[book.subject])}</p></div></div>${mappings.map(({teach,chapter})=>`<div class="book-position"><span>章节顺位 ${esc(chapter.order)}</span><small>${roleName(teach.role)} · ${esc(statusLabel(teach.review_status))}${teach.uncertain?' · 待核':''}</small></div>`).join('')}${sources.length?`<p class="source-catalog-summary">另有 ${sources.length} 份独立目录视图${sourceMappings.length?` · ${sourceMappings.length} 条当前知识点候选关联`:''}</p>`:''}<button class="button" data-book="${esc(book.textbook_id)}">查看教材目录视图 →</button></article>`).join('');
+    if(!books.length)html+='<div class="empty-state">本节点无教材关联记录，可从其他知识点查看教材编排。</div>';
   }else if(state.tab==='standards'){
     $('#detail-content').innerHTML='<div class="loading-inline">正在读取课标条目…</div>';
     try{if(!standardsPromise)standardsPromise=fetchJson('data/standards.json').then(rows=>new Map(rows.map(s=>[s.id,s]))).catch(e=>{standardsPromise=null;throw e;});const all=await standardsPromise;if(token!==state.request||state.tab!=='standards')return;
-      html=r.standards.map(link=>{const s=all.get(link.from);if(!s)return'';return`<article class="resource-card standard-card"><div class="card-label">${s.standard_family==='gaokao-outline'?'考试大纲':'课程标准'} · COVERS</div><div class="standard-meta">${esc(s.education_phase||'')} ${esc(s.school_stage||STAGES[s.applicable_stage]||'')} ${s.grade_band?'· '+esc(s.grade_band)+' 年级':''}</div><p>${esc(s.text)}</p>${reviewTags(link)}<div class="source-id">${esc(s.id)}</div></article>`;}).join('')||'<div class="empty-state">这个知识点尚无公开课标关联。</div>';
+      html=r.standards.map(link=>{const s=all.get(link.from);if(!s)return'';return`<article class="resource-card standard-card"><div class="card-label">${s.standard_family==='gaokao-outline'?'考试大纲':'课程标准'} · COVERS</div><div class="standard-meta">${esc(s.education_phase||'')} ${esc(s.school_stage||STAGES[s.applicable_stage]||'')} ${s.grade_band?'· '+esc(s.grade_band)+' 年级':''}</div><p>${esc(s.text)}</p>${reviewTags(link)}<div class="source-id">${esc(s.id)}</div></article>`;}).join('')||'<div class="empty-state">本节点无独立课标关联记录，可查看所属主题与知识关系。</div>';
     }catch(e){html=`<div class="empty-state">${esc(e.message)}<br><button id="retry-standard" class="retry-button">重试</button></div>`;}
   }
   if(token!==state.request)return;$('#detail-content').innerHTML=html;$('#detail-content').scrollTop=0;
@@ -136,30 +136,30 @@ function booksForConcept(){
 function catalogSelector(group,selected){
   if(!group.sources.length)return'';
   const active=selected.source?.source_id??'canonical';
-  return`<div class="catalog-selector"><label>查看目录<select data-catalog-book="${esc(group.book.textbook_id)}" aria-label="${esc(publisherLabel(group.book)+' '+volumeLabel(group.book))}的目录来源">${(group.sourceOnly||group.canonicalAvailable===false)?'':`<option value="canonical" ${active==='canonical'?'selected':''}>EduGraph 主图目录</option>`}${group.sources.map((s,i)=>`<option value="${esc(s.source_id)}" ${active===s.source_id?'selected':''}>ChinaTextbook ${group.sources.length>1?`${i+1} · `:''}${esc(s.textbook.edition?`${s.textbook.edition} 年版`:'版次未确认')} · ${s.chapters.length?'目录候选':'目录待恢复'}</option>`).join('')}</select></label><span>各来源分别保留编排顺序</span></div>`;
+  return`<div class="catalog-selector"><label>查看目录<select data-catalog-book="${esc(group.book.textbook_id)}" aria-label="${esc(publisherLabel(group.book)+' '+volumeLabel(group.book))}的目录来源">${(group.sourceOnly||group.canonicalAvailable===false)?'':`<option value="canonical" ${active==='canonical'?'selected':''}>EduGraph 主图目录</option>`}${group.sources.map((s,i)=>`<option value="${esc(s.source_id)}" ${active===s.source_id?'selected':''}>独立目录 ${group.sources.length>1?`${i+1} · `:''}${esc(s.textbook.edition?`${s.textbook.edition} 年版`:'版次未确认')} · ${s.chapters.length?'章节目录':'册次信息'}</option>`).join('')}</select></label><span>各来源分别保留编排顺序</span></div>`;
 }
 function catalogTrack(selected){
   const chapters=orderChapters(selected.chapters,selected.book.textbook_id);
-  if(!chapters.length)return'<div class="catalog-empty">此来源已关联到教材系列，但尚未恢复可用目录；不代表教材没有内容。</div>';
+  if(!chapters.length)return'<div class="catalog-empty">此视图提供教材册次信息。可通过教材来源链接查看原书，或切换其他目录视图。</div>';
   return`<div class="catalog-track">${chapters.map((c,i)=>{
     const concepts=selected.chapterConcepts[c.chapter_id]??[],isCurrent=concepts.some(x=>model.nodes[x.id]?.key===state.key);
-    return`${i?'<span class="track-arrow" aria-hidden="true">→</span>':''}<div class="chapter-stop ${isCurrent?'current':''}"><div class="unit-label">${c.level===1?'单元':'章节'}顺位 ${esc(c.orderPath.join('.'))}${c.uncertain?' · 待核':''}</div>${concepts.length?concepts.map(x=>{const n=model.nodes[x.id];if(!n)return'';return`<button data-key="${esc(n.key)}" class="${n.key===state.key?'current':''}" title="${esc(n.name)} · ${roleName(x.role)}${x.uncertain?' · 待核':''}">${esc(n.name)}${x.role==='review'?' · 复习':''}</button>`;}).join(''):'<span class="no-mapping">未关联 Concept</span>'}</div>`;
+    return`${i?'<span class="track-arrow" aria-hidden="true">→</span>':''}<div class="chapter-stop ${isCurrent?'current':''}"><div class="unit-label">${c.level===1?'单元':'章节'}顺位 ${esc(c.orderPath.join('.'))}${c.uncertain?' · 待核':''}</div>${concepts.length?concepts.map(x=>{const n=model.nodes[x.id];if(!n)return'';return`<button data-key="${esc(n.key)}" class="${n.key===state.key?'current':''}" title="${esc(n.name)} · ${roleName(x.role)}${x.uncertain?' · 待核':''}">${esc(n.name)}${x.role==='review'?' · 复习':''}</button>`;}).join(''):'<span class="no-mapping">本章无知识点关联记录</span>'}</div>`;
   }).join('')}</div>`;
 }
 function renderTextbookView(){
   if(!currentResources){$('#textbook-stage').innerHTML='<div class="loading-inline">正在加载教材视图…</div>';return;}
   loadCovers();
   const books=booksForConcept(),publishers=new Map();for(const b of books){const label=publisherLabel(b.book);if(!publishers.has(label))publishers.set(label,[]);publishers.get(label).push(b);}
-  let html='<div class="textbook-note">同一个 Concept，在不同教材中有不同的教学位置。轨道按本册章节顺位排列，蓝色标记当前知识点。<strong>箭头表示教材编排顺序。</strong><br>各来源分别保留目录；已有教材系列可切换来源，新来源可独立查看。参考封面来自 <a href="https://github.com/TapXWorld/ChinaTextbook" target="_blank" rel="noopener noreferrer">ChinaTextbook</a>，不同印次的封面可能不同。</div>';
+  let html='<div class="textbook-note">同一个 Concept，在不同教材中有不同的教学位置。轨道按本册章节顺位排列，蓝色标记当前知识点。<strong>箭头表示教材编排顺序。</strong><br>各教材目录视图保留自己的章节层级与顺序，可切换查看。<a href="assets/covers/NOTICE.txt" target="_blank" rel="noopener noreferrer">查看封面来源</a>；封面版权归相应出版社及权利人，不同印次可能不同。</div>';
   for(const [publisher,group]of publishers){html+=`<section class="publisher-group"><div class="publisher-header"><span class="book-symbol">书</span><div><h3>${esc(publisher)}</h3><small>${group.length} 册关联教材 · 教材视图</small></div></div>`;
     for(const item of group){const{book}=item,selected=catalogForGroup(currentResources,item,selectedCatalogs.get(book.textbook_id)),url=sourceUrl(selected.source);
       html+=`<div class="volume-row" data-volume="${esc(book.textbook_id)}"><header>${bookCover(book)}<div class="volume-heading"><strong>${esc(volumeLabel(book))}</strong><small>${esc(editionLabel(book))} · ${esc(statusLabel(book.review_status))}</small></div></header>${catalogSelector(item,selected)}`;
-      if(selected.source)html+=`<div class="source-catalog-note"><strong>ChinaTextbook 来源目录 · 待核候选</strong><span>${esc(editionLabel(selected.book))}。${item.sourceOnly?'独立教材来源，保留本册目录和知识点关联。':'按教材系列与册次关联，保留各来源的独立编排。'}</span>${url?`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">查看教材来源 ↗</a>`:''}</div>`;
+      if(selected.source)html+=`<div class="source-catalog-note"><strong>独立教材目录视图</strong><span>${esc(editionLabel(selected.book))}。${item.sourceOnly?'独立教材来源，保留本册目录和知识点关联。':'按教材系列与册次关联，保留各来源的独立编排。'}</span>${url?`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">查看教材来源 ↗</a>`:''}</div>`;
       html+=catalogTrack(selected)+'</div>';
     }
     html+='</section>';
   }
-  if(!books.length)html+='<div class="empty-state"><strong>暂无教材映射</strong>可以从其他知识点探索教材编排。</div>';
+  if(!books.length)html+='<div class="empty-state"><strong>本节点无教材关联记录</strong>可从其他知识点探索教材编排。</div>';
   $('#textbook-stage').innerHTML=html;
   for(const track of $$('.catalog-track')){const current=track.querySelector('.current');if(current)track.scrollLeft=Math.max(0,current.offsetLeft-track.offsetLeft-80);}
 }
@@ -171,7 +171,7 @@ function renderPath(){
   $('#known-summary').textContent=`已标记 ${known.size} 个知识点为已掌握 · 仅保存在此浏览器`;
   $('#path-footnote').textContent=evidence.hasPrerequisites?'先修约束下的一条可行顺序；教材编排可单独查看。':'缺少先修记录不等于无需前置知识。';
   if(!evidence.hasPrerequisites){
-    $('#path-content').innerHTML='<div class="empty-state"><strong>尚无先修关系记录</strong>当前数据不足以为此知识点生成先修学习顺序，可先查看课标要求及所属主题。</div>';
+    $('#path-content').innerHTML='<div class="empty-state"><strong>本节点无先修关系记录</strong>可查看课标要求、所属主题与教材编排。</div>';
     return;
   }
   try{const plan=model.graph.learningPath([n.key],[...known],{maxLength:500});
@@ -187,7 +187,7 @@ function populateAbout(){
   renderHero($('#hero-network'),model);
   $('#about-stats').innerHTML=[[c.knowledge_points,'Concepts / 知识点'],[c.topic_nodes,'Topics / 主题'],[c.prerequisite_edges,'Prerequisites / 先修'],[c.keypoints,'KeyPoints / 讲解'],[c.exercises,'Exercises / 习题'],[c.textbooks,'Volumes / 教材册次']].map(([value,label])=>`<div><strong>${num(value)}</strong><span>${label}</span></div>`).join('');
   for(const id of ['#download-about','#download-card','#download-top']){$(id).href=download.file;$(id).setAttribute('download','');}
-  $('#download-description').textContent=`v${manifest.version}${manifest.publication_status==='public-preview'?' · 扩充预览':''} · JSONL + manifest · ${(download.bytes/1048576).toFixed(1)} MiB · tar.gz`;
+  $('#download-description').textContent=`JSONL + manifest · ${(download.bytes/1048576).toFixed(1)} MiB · tar.gz`;
   $('#checksum-link').href=download.file+'.sha256';
 }
 async function loadHeroResources(){
