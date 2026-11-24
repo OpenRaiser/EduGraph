@@ -1,199 +1,103 @@
-# EduGraph public data — v0.31.0 public preview
+# EduGraph Data Card
 
-The download contains the EduGraph main graph (`v0.31.0/`), independent ChinaTextbook source catalog views (`source-views-v0.31.0/`), this data card, and the data license. This is a **public preview**. Curriculum-derived Concepts, prerequisite candidates, automatically matched curriculum links, and machine-reviewed learning resources retain their respective provenance and review status. Public availability and machine review do not certify independent teacher assessment.
+EduGraph is an open K–12 knowledge graph and educational data infrastructure. It connects curriculum requirements, Concepts, Topics, prerequisites, textbook catalogs, explanations, and exercises through stable identifiers. The public package supports knowledge retrieval, textbook comparison, learning-path queries, and educational Agent context construction.
 
-Source views preserve source-specific catalogs and link to main-graph textbook candidates where available. Some have no established canonical match. Source-view counts and main-graph textbook totals are therefore reported separately.
+## Contents and scope
 
-## Main graph
+The knowledge graph spans **18 subjects** and **three learning stages: primary, junior secondary, and senior secondary**. It contains 41 subject/stage knowledge partitions.
 
-| Resource | Count |
+| Knowledge and relations | Count | Teaching resources | Count |
+|---|---:|---|---:|
+| Concepts | 8,938 | KeyPoints | 19,562 |
+| Topics | 1,676 | Exercises | 10,795 |
+| PREREQUISITE edges | 6,447 | StandardItems | 5,463 |
+| REFINES edges | 10,303 | Textbook volumes | 1,161 |
+| COVERS edges | 13,636 | Textbook chapters | 12,607 |
+| TEACHES edges | 23,411 | Subjects / stages | 18 / 3 |
+
+Curriculum organization also includes **255 ContentThemes** and **681 ContentSubThemes**. The manifest's `standard_items` counter includes these organizational nodes, for a total of 6,399 curriculum nodes; the StandardItem row above counts requirement records.
+
+**Subjects:** mathematics, Chinese, English, physics, chemistry, biology, history, geography, politics, science, information technology, music, fine arts, integrated arts, Japanese, Russian, physical education and health, and general technology. Subject/stage metadata identifies the scope of each record. Japanese and Russian include junior and senior secondary partitions; general technology and information technology include senior secondary; integrated arts includes junior and senior secondary knowledge partitions.
+
+## Textbook catalog views
+
+Independent textbook-source views organize each source's catalog separately while linking its chapters to shared Concept identifiers.
+
+| Source-view resource | Count |
 |---|---:|
-| Concepts | 8,938 |
-| Topics | 1,676 |
-| REFINES | 10,303 |
-| PREREQUISITE | 6,447 |
-| KeyPoints | 19,562 |
-| Exercises | 10,795 |
-| StandardItems | 5,463 |
-| Curriculum themes / subthemes | 255 / 681 |
-| COVERS | 13,636 |
-| Textbook volumes | 1,161 |
-| Textbook chapters | 12,607 |
-| TEACHES | 23,411 |
-| Subjects | 18 |
-| Learning stages | 3 |
-| Subject/stage partitions | 41 |
+| Independent catalog views | 1,203 |
+| Views with catalog structure | 992 |
+| Catalog chapter nodes | 11,212 |
+| Chapter-to-Concept mappings | 2,666 |
 
-The StandardItem count includes only records with `type: "StandardItem"`. The manifest's `counts.standard_items` counts all 6,399 curriculum nodes, including the 255 ContentThemes and 681 ContentSubThemes shown separately above.
+A view can link to one or more main-graph textbook candidates. Source-view and main-graph textbook counts are reported separately. Each catalog preserves its own hierarchy, chapter order, and recorded page positions. The explorer also exposes a primary integrated-arts source-catalog partition.
 
-The graph covers mathematics, Chinese, English, physics, chemistry, biology, history, geography, politics, science, information technology, music, fine arts, integrated arts, Japanese, Russian, physical education and health, and general technology. Japanese and Russian cover **junior and senior secondary education**. Physical education and health, music, and fine arts include primary, junior-secondary, and senior-secondary partitions; integrated arts includes junior and senior secondary. General technology covers senior secondary education. These totals do not imply that every subject spans all three stages.
+Textbook order describes a publisher's teaching arrangement. PREREQUISITE describes dependencies in the shared knowledge graph. Keeping these relations separate supports comparisons across textbooks while preserving the common knowledge structure.
 
-## Additions in v0.31.0: source catalogs and learning resources
+## Data organization
 
-Relative to the last public release, v0.29.0, the main graph adds **four primary-science Concepts, 33 KeyPoints, 23 exercises, 79 COVERS edges, and four REFINES edges**. The new Concepts concern water, wind, tidal, and biomass energy. Learning-resource additions include follow-up resources for existing Concepts. All historical main-graph records are retained; Topic, StandardItem, prerequisite, canonical textbook, chapter, and canonical TEACHES counts are unchanged.
+Each nonempty line of a `.jsonl` file is a UTF-8 JSON object. The main-graph directory contains:
 
-Independent source views add **584 sources, 6,761 chapter nodes, and 2,307 TEACHES mappings**. Catalogs are newly available for 601 sources, including 17 existing views. New mappings use catalog or chapter-body evidence, with literal-name checks or model semantic review. In the complete source-view set, 2,297 mappings are `machine_reviewed` (1,101 deterministic literal-name checks and 1,196 model reviews), while 369 retain `draft` status; all retain `uncertain: true`. Original source text and private review records are excluded. Public records retain compact provenance and review metadata.
-
-The explorer exposes 42 subject/stage resource shards: the 41 main-graph partitions and one source-only primary integrated-arts shard. Cross-partition source mappings remain accessible from their target Concept.
-
-## Historical additions in v0.29.0: verified curriculum recovery
-
-Relative to v0.28.0, that release added **42 Concepts, 84 KeyPoints, 42 exercises, 18 StandardItems, 130 COVERS edges, 42 REFINES edges, and four PREREQUISITE edges**. The 42 Concepts comprise 36 in primary/junior English, three in primary science, and three in primary/junior politics. No Topics, textbooks, chapters, or TEACHES edges were added in that batch.
-
-All 42 new Concepts have curriculum references, explanations, and exercises. The original generation, per-item model review, appeal, repair, and promotion stages produced the new learning resources, all marked `machine_reviewed`. Reviews used `gpt-6.1-sol`, with `gpt-6-sol` for the independent appeal where needed. One rejected exercise was regenerated and reviewed rather than retained. Its compact public prompt-version label maps to the unchanged prompt hash and private run evidence.
-
-The curriculum evidence comes from the 2022 compulsory-education English, science, and morality-and-law standards. The 18 additional StandardItems include a source-verified primary-stage projection for an existing requirement previously recorded under junior secondary. The new primary Concept uses the verified projection; historical records and links are retained. COVERS additions include both new-Concept bindings and verified links to existing Concepts.
-
-Prerequisite generation used the full graph as context and restricted proposals to edges touching the 42 new Concepts. Both within-theme and cross-theme generation completed, followed by individual semantic review and the original graph checks. All 6,443 historical prerequisite edges are retained, together with four new edges. Public new-node and edge review states remain `draft` and `candidate`, respectively; agent review is recorded as machine review, not teacher approval.
-
-## Historical additions in v0.28.0: curriculum-driven expansion
-
-That release processed **1,580 additional curriculum requirements** through the original construction workflow and added **1,703 Concepts, 166 Topics, 3,686 KeyPoints, 1,703 exercises, 510 PREREQUISITE edges, 3,125 COVERS edges, and 1,834 REFINES edges** relative to v0.27.0. Curriculum organization added 151 ContentThemes and 561 ContentSubThemes.
-
-| Expansion scope | New Concepts | New KeyPoints | New exercises |
-|---|---:|---:|---:|
-| Junior-secondary Japanese | 108 | 222 | 108 |
-| Primary and junior-secondary physical education and health | 265 | 547 | 265 |
-| Senior Chinese, English, history, biology, chemistry, physics, mathematics, geography, and politics | 1,330 | 2,917 | 1,330 |
-| Total | **1,703** | **3,686** | **1,703** |
-
-The workflow includes candidate generation, duplicate and scope review, identifier assignment, explanation and exercise generation, model review and repair, prerequisite review, and release validation. Every added Concept has curriculum references, a definition explanation, and one exercise. The new learning resources are `machine_reviewed`, with generation and review provenance retained. Both model-review rounds use `gpt-6.1-sol`; independent agent checks supplement the recorded model findings. Explanations and exercises are generated resources, not textbook extracts or independent teacher judgments.
-
-The existing 7,189 Concepts, their identifiers, prior resource records, and all 5,933 historical prerequisite edges are retained. Four new-node aliases were removed to resolve exact-search ambiguity. Public prompt-version labels are shortened to the existing field limit; prompt hashes and complete private provenance are preserved. Curriculum coverage counters are recomputed from the expanded StandardItem set.
-
-Of the 1,580 added StandardItems, **1,505 have COVERS links**; all 1,580 remain in the public curriculum table. Textbook volumes, chapter records, TEACHES links, and independent source views are carried forward from v0.27.0. Concept expansion does not create unverified textbook mappings.
-
-## Historical expansion in v0.27.0: junior-secondary Russian
-
-The v0.27.0 release added **127 Concepts, 12 Topics, and 101 StandardItems** from the 2022 compulsory-education Russian curriculum standard, together with **269 KeyPoints, 127 exercises, 62 PREREQUISITE edges, 187 COVERS edges, and 135 REFINES edges**. Curriculum organization added four ContentThemes and eight ContentSubThemes.
-
-| Russian scope | Concepts | KeyPoints | Exercises |
-|---|---:|---:|---:|
-| Junior secondary, added in v0.27.0 | 127 | 269 | 127 |
-| Senior secondary, retained unchanged | 108 | 230 | 108 |
-| Russian total | **235** | **499** | **235** |
-
-All 127 added Concepts have explanations and exercises. The retained new learning resources are `machine_reviewed`; source-backed agent adjudications supplement the original model review. These are machine review records, not independent teacher assessments. New Concepts remain `draft`, new prerequisites remain `candidate`, and COVERS links remain `auto_matched`.
-
-Of the 101 added StandardItems, **93 have COVERS links and eight remain uncovered**. Complete resource presence for the new Concepts does not imply complete coverage of the curriculum requirements. The uncovered requirements remain in the public data and in the coverage denominator.
-
-That release retained the existing 7,062 Concepts and their prior resources and relationships unchanged. Textbook volumes, chapters, TEACHES links, and independent source views were also unchanged from v0.26.0. New junior-secondary Russian Concepts did not automatically receive textbook mappings.
-
-## Previous expansion in v0.26.0
-
-Compared with v0.25.0, v0.26.0 added **1,313 Concepts and 134 Topics** while retaining the identifiers and full node contents of the existing 5,749 Concepts. It also filled both explanation and exercise gaps for **311 existing Concepts** from the preceding arts-related expansion. Resource generation covered 1,624 Concepts; resource review covered 1,793 Concepts, including 169 existing information-technology Concepts whose resources were already present. The following table records that expansion and its totals at v0.26.0.
-
-| Subject expanded | New Concepts | v0.26.0 Concepts | v0.26.0 KeyPoints | v0.26.0 exercises |
-|---|---:|---:|---:|---:|
-| General technology | 380 | 380 | 807 | 380 |
-| Fine arts | 233 | 390 | 791 | 390 |
-| Physical education and health | 218 | 218 | 474 | 218 |
-| Japanese | 140 | 140 | 295 | 140 |
-| Russian | 108 | 108 | 230 | 108 |
-| Music | 100 | 192 | 388 | 192 |
-| Integrated arts | 86 | 148 | 302 | 148 |
-| Chinese, including calligraphy | 32 | 466 | 1,006 | 602 |
-| Information technology | 16 | 185 | 373 | 185 |
-
-That release added a net **3,387 KeyPoints**, **1,624 exercises**, **691 StandardItems**, and **1,839 COVERS edges**. The 691 additional StandardItems represent **662 distinct source requirements plus 29 stage projections**; a requirement projected to more than one learning stage is not counted as multiple independent source passages. Curriculum organization added 58 ContentThemes and 112 ContentSubThemes.
-
-The expansion ran the original dataset-construction pipeline through actual model-API generation: curriculum requirements were decomposed into candidate Concepts, checked for duplication and scope, assigned stable identifiers, and connected to generated explanations, exercises, and prerequisite proposals. Explanations and exercises are **model-generated educational resources, not textbook extracts**. Earlier records keep their original provenance; they are not retroactively attributed to a later run.
-
-All visible learning resources in the v0.26.0 expansion/review scope completed machine review. Eight newly generated KeyPoints were excluded following recorded review findings. The prerequisite graph was checked for cycles and invalid references, and transitive reduction preserved the reachability of historical prerequisites. A removed redundant direct edge can therefore remain represented by a multi-step path.
-
-That expansion retained textbook volumes, chapters, TEACHES links, and independent source views from v0.25.0. In particular, new Concepts did not automatically receive textbook mappings. The current release does **not** claim complete coverage of all ChinaTextbook materials.
-
-## Curriculum sources used by these expansions
-
-The v0.28.0 additions use the **2022 compulsory-education Japanese and physical education and health curriculum standards**, and **2017 senior-secondary curriculum standards revised in 2020** for Chinese, English, history, biology, chemistry, physics, mathematics, geography, and politics. Earlier expansions used the additional documents listed below. Senior-secondary standards are available through the People's Education Press [official curriculum-standard collection](https://www.pep.com.cn/xw/zt/rjwy/gzkb2020/). Compulsory-education arts content uses the 2022 standard; Chinese calligraphy additions use the 2013 guideline. Source editions are recorded explicitly.
-
-| Scope | Official source document |
+| Path | Contents and identifiers |
 |---|---|
-| Junior Japanese | [义务教育日语课程标准（2022年版）](https://www.moe.gov.cn/srcsite/A26/s8001/202204/W020220420582351505877.pdf) |
-| Primary and junior physical education and health | [义务教育体育与健康课程标准（2022年版）](https://www.moe.gov.cn/srcsite/A26/s8001/202204/W020220420582362336303.pdf) |
-| Senior Chinese | [普通高中语文课程标准（2017年版2020年修订）](https://www.pep.com.cn/xw/zt/rjwy/gzkb2020/202205/P020220517522412911080.pdf) |
-| Senior English | [普通高中英语课程标准（2017年版2020年修订）](https://www.pep.com.cn/xw/zt/rjwy/gzkb2020/202205/P020220517522153664167.pdf) |
-| Senior history | [普通高中历史课程标准（2017年版2020年修订）](https://www.pep.com.cn/xw/zt/rjwy/gzkb2020/202205/P020220517518171679768.pdf) |
-| Senior biology | [普通高中生物学课程标准（2017年版2020年修订）](https://www.pep.com.cn/xw/zt/rjwy/gzkb2020/202205/P020220517519140545267.pdf) |
-| Senior chemistry | [普通高中化学课程标准（2017年版2020年修订）](https://www.pep.com.cn/xw/zt/rjwy/gzkb2020/202205/P020220517517668288401.pdf) |
-| Senior physics | [普通高中物理课程标准（2017年版2020年修订）](https://www.pep.com.cn/xw/zt/rjwy/gzkb2020/202205/P020220517520664858048.pdf) |
-| Senior mathematics | [普通高中数学课程标准（2017年版2020年修订）](https://www.pep.com.cn/xw/zt/rjwy/gzkb2020/202205/P020220517519489596282.pdf) |
-| Senior geography | [普通高中地理课程标准（2017年版2020年修订）](https://www.pep.com.cn/xw/zt/rjwy/gzkb2020/202205/P020220517516728907929.pdf) |
-| Senior politics | [普通高中思想政治课程标准（2017年版2020年修订）](https://www.pep.com.cn/xw/zt/rjwy/gzkb2020/202205/P020220517519869509154.pdf) |
-| Senior information technology | [普通高中信息技术课程标准（2017年版2020年修订）](https://www.pep.com.cn/xw/zt/rjwy/gzkb2020/202205/P020220517521187437000.pdf) |
-| Senior music | [普通高中音乐课程标准（2017年版2020年修订）](https://www.pep.com.cn/xw/zt/rjwy/gzkb2020/202205/P020220517521792634168.pdf) |
-| Senior fine arts | [普通高中美术课程标准（2017年版2020年修订）](https://www.pep.com.cn/xw/zt/rjwy/gzkb2020/202205/P020220517518487651706.pdf) |
-| Senior integrated arts | [普通高中艺术课程标准（2017年版2020年修订）](https://www.pep.com.cn/xw/zt/rjwy/gzkb2020/202205/P020220517521458591016.pdf) |
-| Senior general technology | [普通高中通用技术课程标准（2017年版2020年修订）](https://www.pep.com.cn/xw/zt/rjwy/gzkb2020/202205/P020220517520410285510.pdf) |
-| Senior physical education and health | [普通高中体育与健康课程标准（2017年版2020年修订）](https://www.pep.com.cn/xw/zt/rjwy/gzkb2020/202205/P020220517520130143580.pdf) |
-| Senior Japanese | [普通高中日语课程标准（2017年版2020年修订）](https://www.pep.com.cn/xw/zt/rjwy/gzkb2020/202205/P020220517518796185803.pdf) |
-| Senior Russian | [普通高中俄语课程标准（2017年版2020年修订）](https://www.pep.com.cn/xw/zt/rjwy/gzkb2020/202205/P020220517517065940620.pdf) |
-| Junior Russian | [义务教育俄语课程标准（2022年版）](https://www.moe.gov.cn/srcsite/A26/s8001/202204/W020220420582353002089.pdf) |
-| Compulsory-education music, fine arts, and integrated arts | [义务教育艺术课程标准（2022年版）](https://www.moe.gov.cn/srcsite/A26/s8001/202204/W020220420582364678888.pdf) |
-| Chinese calligraphy | [中小学书法教育指导纲要（2013）](https://hudong.moe.gov.cn/srcsite/A26/s8001/201301/t20130125_147389.html) |
+| `knowledge-points/<subject>/<stage>/nodes.jsonl` | Concepts and Topics; `key` is the stable identifier and `node_kind` distinguishes the node classes. |
+| `knowledge-points/<subject>/<stage>/edges.jsonl` | REFINES and PREREQUISITE edges, with `from` and `to` endpoints. |
+| `keypoints/` | Explanations linked by `kp_key`. |
+| `exercises/` | Exercises, answers, and explanations linked by `kp_keys`. |
+| `standards/nodes.jsonl` | Curriculum requirements, themes, and subthemes. |
+| `standards-alignment/covers.jsonl` | Curriculum-to-Concept COVERS edges. |
+| `textbook-alignment/` | Textbook metadata, chapter hierarchy, and TEACHES mappings. |
+| `keys/`, `index/`, `changes/` | Identifier management, retrieval indexes, and change records. |
+| `manifest.json` | Counts, partition metadata, and snapshot identity. |
 
-The public StandardItem records retain selected requirement text, source family, stage information, and Concept associations. Source documents are identified by the official links above. The Japanese and physical-education preparation used recorded institutional reprints of those documents; their download origin is not relabeled as an official-host download. Original PDFs, OCR transcripts, generation/review archives, and page-level working evidence are not included in the public package. A curriculum link does not establish that every mapped textbook uses the same curriculum or publication edition.
+The independent catalog-view directory contains:
 
-## ChinaTextbook source views
+| File | Contents |
+|---|---|
+| `textbooks.jsonl` | Source-specific Textbook metadata. |
+| `chapters.jsonl` | TextbookChapter records with source-specific hierarchy and order. |
+| `teaches.jsonl` | TEACHES mappings to main-graph Concept keys. |
+| `source-links.jsonl` | Source identifiers, original links, and candidate main-graph textbook associations. |
+| `index.json` | Scope, counts, and SHA-256 file checksums. |
 
-Source snapshot: [TapXWorld/ChinaTextbook at e2b3f62213c77bb8c33c5be355f97625ea1b8b61](https://github.com/TapXWorld/ChinaTextbook/tree/e2b3f62213c77bb8c33c5be355f97625ea1b8b61), checked on 2026-11-11.
+The repository's `data/release.json` identifies the packaged main graph and catalog directory. The [download page](https://openraiser.github.io/EduGraph/#/about) provides the complete data archive and its checksum. Each archive includes this data card and the data license.
 
-The earlier v0.24.0 intake matched 980 main-textbook sources within the original ten subjects. Matching used subject, school system, textbook series/editor, grade, and volume; it did not certify identical publication editions. Of these sources, 957 matched a single main-graph record and 23 retained multiple same-series edition candidates. Seventy-two activity manuals or supplementary readers were outside that intake. These are historical ten-subject intake statistics, not evidence of exhaustive coverage across the current eighteen subjects.
+## Relationship semantics
 
-That intake added 361 textbook records, 4,048 chapter nodes, and 1,044 TEACHES edges relative to v0.21.0. The subsequent information-technology expansion added 48 textbook records, 1,681 chapter nodes, and 396 TEACHES edges. These records are retained unchanged in v0.31.0.
+| Relationship | Direction | Purpose |
+|---|---|---|
+| REFINES | Child node → parent Topic | Knowledge taxonomy and hierarchy. |
+| PREREQUISITE | Prerequisite Concept → successor Concept | Dependency traversal and learning order. |
+| COVERS | StandardItem → Concept | Curriculum grounding. |
+| TEACHES | TextbookChapter → Concept | Teaching location and role, including primary teaching, review, and mention. |
 
-The current package contains the following independently organized source catalogs:
+Resolve prerequisite endpoints across all subject/stage partitions to support cross-stage paths. A learning path returns a feasible order under the recorded prerequisites and the supplied known-Concept set. Browser mastery selections are stored locally.
 
-| Independent source-view resource | Count |
-|---|---:|
-| Source views | 1,203 |
-| Sources with recovered catalog candidates | 992 |
-| Sources without supported catalog structure yet | 211 |
-| Chapter nodes | 11,212 |
-| TEACHES edges | 2,666 |
+For durable references, use the Concept `key`. Browser `id` values index the current build. Resource shards expose explanations, exercises, curriculum links, textbook mappings, and independent catalog mappings associated with each Concept.
 
-The distribution directory is `source-views-v0.31.0/`; its index records counts and SHA-256 checksums for the four JSONL files. Historical mappings and newly reviewed mappings retain their respective review fields.
+## Provenance and review metadata
 
-Across the frozen inventory of **2,046 non-university source entries**, 1,612 entries are represented: 1,203 independent source views and 409 sources directly integrated into the main graph. This is **78.8% source-entry representation**, up from 1,028 entries in the previous public release. It is not a claim of complete edition matching, complete catalogs, or full textbook-content coverage.
+Records retain source attribution, authorship, and applicable review fields. Curriculum requirements are tied to source documents; learning resources include generated and independently authored explanations and exercises. Catalog metadata and mappings retain their evidence and review method identifiers.
 
-These counts overlap with the main graph's textbook coverage and must not be added to its textbook totals. Each source preserves its own chapter order. Alternative catalogs are not interleaved into a single order, and textbook order is not converted into prerequisite edges.
+| Field value | Meaning |
+|---|---|
+| `draft` / `candidate` | A recorded candidate with its provenance and current review state. |
+| `auto_matched` | An association produced by the matching process. |
+| `machine_reviewed` | Automated review using the model or deterministic method recorded in the metadata. |
+| `spot_checked` | A recorded spot-check designation; consult the corresponding provenance. |
+| `uncertain` | The record's explicit uncertainty flag. |
 
-## Read the data
+These fields describe individual records. Model or code review is distinct from teacher assessment. [Source attribution](https://github.com/OpenRaiser/EduGraph/blob/main/docs/SOURCES.md) provides curriculum-document references and textbook-source acknowledgements.
 
-Each nonempty line in a `.jsonl` file is a UTF-8 JSON object. The main graph's `manifest.json` records counts and snapshot metadata; consult its stated scope before using any coverage denominator. The following graph paths are relative to `v0.31.0/`:
+## Access and reuse
 
-- `knowledge-points/<subject>/<stage>/nodes.jsonl`: Concepts and Topics. `node_kind` distinguishes them; `key` is their stable identifier.
-- `knowledge-points/<subject>/<stage>/edges.jsonl`: REFINES points from child to parent; PREREQUISITE points from prerequisite to successor. Some prerequisites cross stages; resolve endpoints against all node partitions.
-- `keypoints/`: explanations associated through `kp_key`.
-- `exercises/`: generated or independently authored exercises associated through `kp_keys`, with answers and explanations. Consult each record's provenance.
-- `standards/nodes.jsonl` and `standards-alignment/covers.jsonl`: curriculum requirements, themes/subthemes, and Concept mappings.
-- `textbook-alignment/`: volume metadata, chapter structure, and chapter-to-Concept mappings (TEACHES). The public package retains chapter positions, not original chapter titles or printed numbering.
-- `keys/`, `index/`, and `changes/`: identifier governance, retrieval indexes, and release history.
+- **Explore:** search by keyword, subject, and stage in the [online explorer](https://openraiser.github.io/EduGraph/).
+- **Query:** reuse the repository's JavaScript retrieval and graph modules for neighbors, learning paths, and associated resources.
+- **Download:** use the JSONL archive and verify its SHA-256 checksum.
+- **Validate:** the build checks identifiers, relation endpoints, prerequisite cycles, resource counts, and public-package contents.
 
-The archive also contains `source-views-v0.31.0/`:
+## License
 
-- `textbooks.jsonl`, `chapters.jsonl`, and `teaches.jsonl`: source-specific views using the existing Textbook, TextbookChapter, and TEACHES types. TEACHES targets are stable Concept keys from the main graph.
-- `source-links.jsonl`: an auxiliary index associating `source_textbook_id` with `existing_textbook_ids` in the main graph. A nullable `preferred_textbook_id` does not resolve every edition ambiguity. This index introduces no new Concept or prerequisite type.
-- `index.json`: source-view scope, counts, and integrity metadata, separate from the main graph's manifest.
+Structured public data is distributed under **Creative Commons Attribution-ShareAlike 4.0 International**, included as `LICENSE-DATA`. Retain EduGraph attribution and the license when redistributing, and consult record-level provenance for resource-specific terms.
 
-In the source repository, `data/open/v0.31.0/` is Git-ignored and extracted during the build. The main graph is distributed in `data/edugraph-v0.31.0.tar.gz` with a companion SHA-256 checksum, rather than as individually tracked JSONL files.
-
-## Interpretation and review status
-
-Resource presence, catalog completeness, and mapping correctness are different properties. Reading source front/back matter is not a full-text audit. Across the earlier 980-source intake, 752 sources had recovered catalog candidates; this does not establish complete catalogs for those books. Missing supported TEACHES links mean no binding has been established, not that a textbook does not teach the Concept.
-
-The Concepts added in v0.31.0, v0.29.0, v0.28.0, and v0.27.0, and those added or resource-completed in v0.26.0, all have explanations and exercises. Across the full inherited graph, ten historical physics Concepts still lack these resources. Historical review states are also retained: 125 KeyPoints and three exercises remain draft; these are outside this release's expansion/review scope. Existing `spot_checked` fields are inherited historical metadata, not new teacher judgments from this run.
-
-New curriculum-based Concepts remain `draft`; new prerequisites remain `candidate`; COVERS links are `auto_matched`. Visible explanations and exercises in this release's review scope are `machine_reviewed`. Independent source-view mappings preserve their per-record `machine_reviewed` or historical `draft` state and uncertainty field. These labels describe different review stages and must not be collapsed into a claim of independent teacher verification.
-
-The release passes the original structural, reference-integrity, release-scan, and manifest-consistency checks. These checks and machine semantic review support usability and traceability; they do not guarantee every educational statement or mapping is correct.
-
-Shared prerequisites and publisher-specific teaching order describe different relationships. Course-module order is not automatically converted into prerequisite edges. The data does not contain real student histories or individualized learner states. Website figures retained from the paper or earlier site are historical illustrations; their Concept, subject, textbook, and coverage figures do not describe the current preview. Current totals are given by the manifests and tables above.
-
-## License and source material
-
-Structured public data: Creative Commons Attribution-ShareAlike 4.0 International, included as `LICENSE-DATA`. Retain attribution to EduGraph, the release identifier, and the license when redistributing. Consult the original records for resource-specific license information.
-
-ChinaTextbook supplies the reference sources for the catalog expansion. Textbook PDFs, body text, OCR transcripts, and original catalog titles are not redistributed in this package. Textbook content and cover rights remain with their respective publishers and rights holders; they are not relicensed by EduGraph. Website cover previews retain their separate source notices.
-
-The explorer code is distributed separately under Apache 2.0. Paper illustrations belong to the project-provided website materials and are not part of this data archive.
+The explorer code uses **Apache 2.0**. Textbook content and cover artwork remain the property of their respective publishers and rights holders. Cover previews carry a separate [source notice](https://github.com/OpenRaiser/EduGraph/blob/main/web/assets/covers/NOTICE.txt).
