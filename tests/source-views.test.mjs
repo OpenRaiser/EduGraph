@@ -1,10 +1,26 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {groupTextbooks,catalogForGroup,editionLabel,volumeLabel,sourceUrl} from '../web/textbook-views.mjs';
+import {groupTextbooks,catalogForGroup,editionLabel,publisherLabel,volumeLabel,sourceUrl} from '../web/textbook-views.mjs';
 const book={textbook_id:'book-a',publisher:'人民教育出版社',grade:'grade3',volume:'vol1'};
 const chapter={chapter_id:'main-1',textbook_id:'book-a',order:1};
 const source={source_id:'source-a',textbook:{...book,textbook_id:'source-book'},existing_textbook_ids:['book-a'],preferred_textbook_id:'book-a',
   chapters:[{chapter_id:'source-2',textbook_id:'source-book',order:2},{chapter_id:'source-1',textbook_id:'source-book',order:1}],chapterConcepts:{'source-2':[{id:3}]}};
 const resources={textbooks:[book],chapters:[chapter],chapterConcepts:{'main-1':[{id:1}]},sourceViews:[source]};
+test('a newly covered source with no canonical counterpart remains browsable',()=>{
+  const independent={...source,existing_textbook_ids:[],preferred_textbook_id:null};
+  const input={textbooks:[],chapters:[],chapterConcepts:{},sourceViews:[independent]};
+  const [group]=groupTextbooks(input,{sourceTeaches:[{source_id:'source-a',from:'source-2'}]});
+  assert(group);assert.equal(group.sourceOnly,true);assert.equal(group.book.textbook_id,'source-book');
+  assert.equal(group.sources.length,1);assert.strictEqual(catalogForGroup(input,group).chapters,source.chapters);
+  assert.equal(catalogForGroup(input,group,'canonical').source.source_id,'source-a');
+});
+test('a Concept can find a source linked to a textbook in another subject',()=>{
+  const input={...resources,textbooks:[],linkedTextbooks:[book]};
+  const [group]=groupTextbooks(input,{sourceTeaches:[{source_id:'source-a',from:'source-2'}]});
+  assert.equal(group.book.textbook_id,'book-a');assert.equal(group.sourceOnly,false);
+  assert.equal(group.canonicalAvailable,false);
+  assert.equal(catalogForGroup(input,group).source.source_id,'source-a');
+  assert.equal(catalogForGroup(input,group,'canonical').source.source_id,'source-a');
+});
 test('a concept with only source mappings reaches an existing book and opens that source',()=>{
   const groups=groupTextbooks(resources,{teaches:[],sourceTeaches:[{source_id:'source-a',from:'source-2'}]});
   assert.equal(groups.length,1);assert.equal(groups[0].book.textbook_id,'book-a');
@@ -35,4 +51,13 @@ test('module textbooks do not invent a grade when none is specified',()=>{
   assert.equal(volumeLabel({grade:null,volume:'m1'}),'m1');
   assert.equal(volumeLabel({grade:'grade3',volume:'vol1'}),'3 年级 · vol1');
   assert.equal(volumeLabel({}),'册次待确认');
+});
+test('sources with an unconfirmed publisher remain browsable without altering metadata',()=>{
+  const unknown={...source,source_id:'unknown',textbook:{textbook_id:'unconfirmed'},existing_textbook_ids:[],preferred_textbook_id:null};
+  const input={...resources,sourceViews:[source,unknown]},before=JSON.stringify(input);
+  const groups=groupTextbooks(input,{sourceTeaches:[{source_id:'unknown',from:'source-2'},{source_id:'source-a',from:'source-2'}]});
+  assert.equal(groups.length,2);assert.equal(groups[0].book.textbook_id,'book-a');
+  assert.equal(publisherLabel(groups[1].book),'出版社待确认');assert.equal(publisherLabel({publisher:'   '}),'出版社待确认');
+  assert.equal(publisherLabel(book),'人民教育出版社');assert.equal(catalogForGroup(input,groups[1]).source.source_id,'unknown');
+  assert.equal(JSON.stringify(input),before);
 });

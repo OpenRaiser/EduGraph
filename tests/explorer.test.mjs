@@ -10,6 +10,8 @@ const sourceRoot=new URL(`../data/open/v${manifest.version}/`,import.meta.url);
 const release=JSON.parse(await readFile(new URL('../data/release.json',import.meta.url),'utf8'));
 const sourceManifest=JSON.parse(await readFile(new URL('manifest.json',sourceRoot),'utf8'));
 const sourceRows=async path=>(await readFile(new URL(path,sourceRoot),'utf8')).split(/\r?\n/).filter(Boolean).map(JSON.parse);
+const sourceBooks=(await readFile(new URL(`../data/${release.sourceViews}/textbooks.jsonl`,import.meta.url),'utf8')).split(/\r?\n/).filter(Boolean).map(JSON.parse);
+const nodeScopes=new Set(model.nodes.map(n=>`${n.subject}/${n.stage}`));
 const expansionSubjects=['information-technology','music','fine-arts','arts','general-technology','physical-education','japanese','russian'];
 const fraction=model.nodes.find(n=>n.name==='分数'&&n.stage==='primary');
 const conversion=model.nodes.find(n=>n.name==='小数与分数的互化'&&n.stage==='primary');
@@ -22,7 +24,7 @@ test('The public graph matches the release manifest and has no prerequisite cycl
   assert.equal(model.nodes.filter(n=>n.node_kind==='topic').length,sourceManifest.counts.topic_nodes);
   assert.equal(model.edges.filter(e=>e.type==='PREREQUISITE').length,sourceManifest.counts.prerequisite_edges);
   assert.equal(model.edges.filter(e=>e.type==='REFINES').length,sourceManifest.counts.refines_edges);
-  assert.deepEqual(new Set(manifest.scopes.map(s=>`${s.subject}/${s.stage}`)),new Set(model.nodes.map(n=>`${n.subject}/${n.stage}`)));
+  assert.deepEqual(new Set(manifest.scopes.map(s=>`${s.subject}/${s.stage}`)),new Set([...nodeScopes,...sourceBooks.map(b=>`${b.subject}/${b.stage}`)]));
   assert.ok(manifest.scopes.every(s=>SUBJECTS[s.subject]));
   assert.equal(manifest.publication_status,release.publicationStatus??sourceManifest.publication_status);
   assert.equal(manifest.expansion_status,release.expansionStatus??sourceManifest.expansion_status);
@@ -33,6 +35,12 @@ test('Expanded subjects preserve source resources, curriculum links and distinct
   let checkedScopes=0;
   for(const scope of manifest.scopes.filter(s=>expansionSubjects.includes(s.subject))){
     const name=`${scope.subject}/${scope.stage}`;
+    if(!nodeScopes.has(name)){
+      const shard=await read(`data/resources/${name}.json`);
+      assert.equal(scope.concepts,0);assert.equal(scope.keypoints,0);assert.equal(scope.exercises,0);
+      assert.deepEqual(shard.concepts,{});assert.ok(shard.sourceViews.some(v=>`${v.textbook.subject}/${v.textbook.stage}`===name));
+      continue;
+    }
     const [nodes,keypoints,exercises,edges,shard]=await Promise.all([
       sourceRows(`knowledge-points/${name}/nodes.jsonl`),sourceRows(`keypoints/${name}/keypoints.jsonl`),
       sourceRows(`exercises/${name}/exercises.jsonl`),sourceRows(`knowledge-points/${name}/edges.jsonl`),read(`data/resources/${name}.json`)]);

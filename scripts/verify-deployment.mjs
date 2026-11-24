@@ -33,7 +33,8 @@ const sourceArchive=fileURLToPath(new URL(`../data/edugraph-v${configured.versio
 const readSource=resource=>execFileSync('tar',['-xOf',sourceArchive,`v${configured.version}/${resource}`],{encoding:'utf8',maxBuffer:16*1024*1024});
 const sourceManifest=JSON.parse(readSource('manifest.json'));
 assert.deepEqual(manifest.counts,sourceManifest.counts);
-assert.deepEqual(new Set(manifest.scopes.map(s=>`${s.subject}/${s.stage}`)),new Set(Object.keys(sourceManifest.counts.keypoint_partitions)));
+const sourceBooks=(await readFile(new URL(`../data/${configured.sourceViews}/textbooks.jsonl`,import.meta.url),'utf8')).split(/\r?\n/).filter(Boolean).map(JSON.parse);
+assert.deepEqual(new Set(manifest.scopes.map(s=>`${s.subject}/${s.stage}`)),new Set([...Object.keys(sourceManifest.counts.keypoint_partitions),...sourceBooks.map(b=>`${b.subject}/${b.stage}`)]));
 assert.ok(manifest.scopes.every(s=>SUBJECTS[s.subject]));
 assert.equal(manifest.publication_status,configured.publicationStatus??sourceManifest.publication_status);
 assert.equal(manifest.expansion_status,configured.expansionStatus??sourceManifest.expansion_status);
@@ -63,7 +64,8 @@ for(const scope of manifest.scopes){
   assert.equal(records.reduce((n,r)=>n+r.teaches.length,0),scope.teaches);
   if(!scope.textbooks){assert.deepEqual(shard.chapters,[]);assert.ok(records.every(r=>!r.teaches.length));}
   const sample=scopedConcepts[0];
-  assert.ok(findNodes(model,sample.name,{subject:scope.subject,stage:scope.stage}).some(n=>n.key===sample.key));
+  if(sample)assert.ok(findNodes(model,sample.name,{subject:scope.subject,stage:scope.stage}).some(n=>n.key===sample.key));
+  else assert.ok(shard.sourceViews.some(v=>v.textbook.subject===scope.subject&&v.textbook.stage===scope.stage),'A source-only partition must preserve its catalogs');
   if(scope.subject==='information-technology'){
     const found=findNodes(model,'数据编码',{subject:scope.subject,stage:scope.stage})[0],entry=shard.concepts[found.id];
     assert.equal(found.name,'数据编码');assert.ok(entry.keypoints.length>0);assert.ok(entry.exercises.length>0);assert.ok(entry.teaches.length>0);

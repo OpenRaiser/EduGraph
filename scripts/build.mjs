@@ -5,6 +5,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { InvertedIndex } from '../web/core/bm25.mjs';
 import {verifyPublicSite,verifyReleaseArchive} from './verify-public-site.mjs';
+import {indexSourceViews} from './source-view-shards.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const release = JSON.parse(await readFile(path.join(root,'data/release.json'),'utf8'));
@@ -71,7 +72,10 @@ await cp(path.join(root,'web'), out, {recursive:true,filter:sourcePath=>{
 await cp(path.join(root,'LICENSE'),path.join(out,'LICENSE'));
 await cp(path.join(root,'LICENSE-DATA'),path.join(out,'LICENSE-DATA'));
 await writeFile(path.join(out,'.nojekyll'), '');
-const scopes = [...new Set(nodes.map(n=>`${n.subject}/${n.stage}`))].sort();
+const allTextbooks=(await Promise.all((await files(path.join(source,'textbook-alignment'),'textbooks.jsonl')).map(readLines))).flat();
+const sourceShards=indexSourceViews({nodes,textbooks:allTextbooks,sourceBooks,sourceChapters,sourceTeaches,sourceLinks});
+const nodeScopes=new Set(nodes.map(n=>`${n.subject}/${n.stage}`));
+const scopes = [...new Set([...nodeScopes,...sourceShards.keys()])].sort();
 const summary = [];
 let exercisesTotal=0, keypointsTotal=0, chaptersTotal=0, textbooksTotal=0, teachesTotal=0;
 for (const scope of scopes) {
@@ -83,8 +87,8 @@ for (const scope of scopes) {
     }
   };
   const [keypoints,exercises,textbooks,chapters,teaches] = await Promise.all([
-    readLines(path.join(source,'keypoints',scope,'keypoints.jsonl')),
-    readLines(path.join(source,'exercises',scope,'exercises.jsonl')),
+    nodeScopes.has(scope)?readLines(path.join(source,'keypoints',scope,'keypoints.jsonl')):[],
+    nodeScopes.has(scope)?readLines(path.join(source,'exercises',scope,'exercises.jsonl')):[],
     textbookLines('textbooks'),
     textbookLines('chapters'),
     textbookLines('teaches'),
@@ -107,14 +111,10 @@ for (const scope of scopes) {
   // Store every chapter's concept mappings so the entire catalog view can be explored.
   const chapterConcepts = Object.create(null);
   for (const t of teaches) (chapterConcepts[t.from]??=[]).push({id:byKey.get(t.to),role:t.role});
-  const sourceViews=sourceBooks.filter(b=>`${b.subject}/${b.stage}`===scope).map(book=>{
-    const link=sourceLinks.find(l=>l.source_textbook_id===book.textbook_id),cs=sourceChapters.filter(c=>c.textbook_id===book.textbook_id),ids=new Set(cs.map(c=>c.chapter_id));
-    const ts=sourceTeaches.filter(t=>ids.has(t.from)),cc=Object.create(null);
-    for(const t of ts){if(!byKey.has(t.to))throw new Error('Invalid source Concept');entry(t.to).sourceTeaches.push({source_id:link.source_id,...pick(t,['from','role','review_status','uncertain'])});(cc[t.from]??=[]).push({id:byKey.get(t.to),...pick(t,['role','review_status','uncertain'])});}
-    if(!link.existing_textbook_ids.every(id=>textbooks.some(b=>b.textbook_id===id)))throw new Error('Invalid source textbook link');
-    return {source_id:link.source_id,textbook:book,chapters:cs,teaches:ts,chapterConcepts:cc,...pick(link,['existing_textbook_ids','preferred_textbook_id','source_url','catalog_status'])};
-  });
-  await json(`data/resources/${scope}.json`,{concepts:conceptData,textbooks:textbooks.map(t=>pick(t,['textbook_id','publisher','series','variant','edition','grade','volume','volume_label','subject','stage','source','review_status','toc_completeness'])),chapters:chapters.map(c=>pick(c,['chapter_id','textbook_id','parent_id','level','order','uncertain'])),chapterConcepts,sourceViews});
+  const sourceShard=sourceShards.get(scope),sourceViews=sourceShard?.views??[];
+  for(const [key,mappings]of sourceShard?.conceptMappings??[])entry(key).sourceTeaches.push(...mappings);
+  const bookFields=['textbook_id','publisher','series','variant','edition','grade','volume','volume_label','subject','stage','source','review_status','toc_completeness'];
+  await json(`data/resources/${scope}.json`,{concepts:conceptData,textbooks:textbooks.map(t=>pick(t,bookFields)),linkedTextbooks:(sourceShard?.linkedTextbooks??[]).map(t=>pick(t,bookFields)),chapters:chapters.map(c=>pick(c,['chapter_id','textbook_id','parent_id','level','order','uncertain'])),chapterConcepts,sourceViews});
   summary.push({subject:scope.split('/')[0],stage:scope.split('/')[1],concepts:nodes.filter(n=>`${n.subject}/${n.stage}`===scope&&n.node_kind!=='topic').length,keypoints:keypoints.length,exercises:exercises.length,textbooks:textbooks.length,teaches:teaches.length,prerequisites:edges.filter(e=>e.type==='PREREQUISITE'&&(e.from.startsWith(scope.replace('/','.')+'.')||e.to.startsWith(scope.replace('/','.')+'.'))).length});
 }
 for (const [actual,k] of [[exercisesTotal,'exercises'],[keypointsTotal,'keypoints'],[chaptersTotal,'textbook_chapters'],[textbooksTotal,'textbooks'],[teachesTotal,'teaches_edges']]) if(actual!==manifest.counts[k]) throw new Error(`${k} count mismatch`);
