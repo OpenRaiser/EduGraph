@@ -31,6 +31,19 @@ Curriculum records identify source documents, learning stages, and requirements.
 | Compulsory-education music, fine arts, and integrated arts | [义务教育艺术课程标准（2022年版）](https://www.moe.gov.cn/srcsite/A26/s8001/202204/W020220420582364678888.pdf) |
 | Chinese calligraphy | [中小学书法教育指导纲要（2013）](https://hudong.moe.gov.cn/srcsite/A26/s8001/201301/t20130125_147389.html) |
 
+## University course syllabi
+
+University requirements are organized from the following institution-published course syllabi. Each requirement retains its source attribution and university-stage scope.
+
+| Course | Institutional source |
+|---|---|
+| Linear algebra | North China University of Technology: [线性代数课程教学大纲](https://jwc.ncut.edu.cn/__local/E/83/C8/AF472BE7B3F278FCC8F2E842B92_82B05A1F_30F62.pdf) |
+| Calculus, part I | North China University of Technology: [高等数学 I(1)A 课程教学大纲](https://jwc.ncut.edu.cn/__local/0/90/EE/7624A1BC77B46AA0266AFA2A0F0_1A51EFB7_44030.pdf) |
+| Calculus, part II | North China University of Technology: [高等数学 I(2) 课程教学大纲](https://jwc.ncut.edu.cn/DG7030702.pdf) |
+| Probability and mathematical statistics | North China University of Technology: [概率论与数理统计 I 课程教学大纲](https://jwc.ncut.edu.cn/DG7029501.pdf) |
+| Discrete mathematics | Xinxiang University: [离散数学教学大纲](https://sx.xxu.edu.cn/13Xlisanshuxue-1512105903.pdf) |
+| Discrete mathematics | University of Chinese Academy of Sciences: [离散数学课程大纲](https://jwba.ucas.ac.cn/sc/course/courseplan/233692) |
+
 ## Textbook catalog sources
 
 Textbook-source metadata and independent catalog views reference [TapXWorld/ChinaTextbook](https://github.com/TapXWorld/ChinaTextbook/tree/e2b3f62213c77bb8c33c5be355f97625ea1b8b61). Source links retain the repository revision and the path identifying each document. EduGraph's structured records describe textbook metadata, catalog positions, and Concept associations.

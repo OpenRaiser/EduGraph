@@ -1,21 +1,21 @@
 # EduGraph Data Card
 
-EduGraph is an open K–12 knowledge graph and educational data infrastructure. It connects curriculum requirements, Concepts, Topics, prerequisites, textbook catalogs, explanations, and exercises through stable identifiers. The public package supports knowledge retrieval, textbook comparison, learning-path queries, and educational Agent context construction.
+EduGraph is an open knowledge graph and educational data infrastructure spanning school and university learning. It connects curriculum requirements, Concepts, Topics, prerequisites, textbook catalogs, explanations, and exercises through stable identifiers. The public package supports knowledge retrieval, textbook comparison, learning-path queries, and educational Agent context construction.
 
 ## Contents and scope
 
-The knowledge graph spans **18 subjects** and **three learning stages: primary, junior secondary, and senior secondary**. It contains 41 subject/stage knowledge partitions.
+The knowledge graph spans **18 subjects** and **four learning stages: primary, junior secondary, senior secondary, and university**. It contains 42 subject/stage knowledge partitions. University mathematics covers linear algebra, calculus, probability and mathematical statistics, and discrete mathematics.
 
 | Knowledge and relations | Count | Teaching resources | Count |
 |---|---:|---|---:|
-| Concepts | 8,938 | KeyPoints | 19,562 |
-| Topics | 1,676 | Exercises | 10,795 |
-| PREREQUISITE edges | 6,447 | StandardItems | 5,463 |
-| REFINES edges | 10,303 | Textbook volumes | 1,161 |
-| COVERS edges | 13,636 | Textbook chapters | 12,607 |
-| TEACHES edges | 23,411 | Subjects / stages | 18 / 3 |
+| Concepts | 9,242 | KeyPoints | 20,215 |
+| Topics | 1,717 | Exercises | 11,099 |
+| PREREQUISITE edges | 6,674 | StandardItems | 5,631 |
+| REFINES edges | 10,644 | Textbook volumes | 1,161 |
+| COVERS edges | 13,956 | Textbook chapters | 12,607 |
+| TEACHES edges | 23,411 | Subjects / stages | 18 / 4 |
 
-Curriculum organization also includes **255 ContentThemes** and **681 ContentSubThemes**. The manifest's `standard_items` counter includes these organizational nodes, for a total of 6,399 curriculum nodes; the StandardItem row above counts requirement records.
+Curriculum organization also includes **261 ContentThemes** and **725 ContentSubThemes**. The manifest's `standard_items` counter includes these organizational nodes, for a total of 6,617 curriculum nodes; the StandardItem row above counts requirement records. University requirements come from institution-published course syllabi, while school requirements reference the corresponding curriculum standards.
 
 **Subjects:** mathematics, Chinese, English, physics, chemistry, biology, history, geography, politics, science, information technology, music, fine arts, integrated arts, Japanese, Russian, physical education and health, and general technology. Subject/stage metadata identifies the scope of each record. Japanese and Russian include junior and senior secondary partitions; general technology and information technology include senior secondary; integrated arts includes junior and senior secondary knowledge partitions.
 
@@ -25,12 +25,14 @@ Independent textbook-source views organize each source's catalog separately whil
 
 | Source-view resource | Count |
 |---|---:|
-| Independent catalog views | 1,203 |
-| Views with catalog structure | 992 |
-| Catalog chapter nodes | 11,212 |
-| Chapter-to-Concept mappings | 2,666 |
+| Independent catalog views | 1,217 |
+| Views with catalog structure | 1,006 |
+| Catalog chapter nodes | 11,712 |
+| Chapter-to-Concept mappings | 3,040 |
 
 A view can link to one or more main-graph textbook candidates. Source-view and main-graph textbook counts are reported separately. Each catalog preserves its own hierarchy, chapter order, and recorded page positions. The explorer also exposes a primary integrated-arts source-catalog partition.
+
+University resources comprise **304 Concepts, 41 Topics, 653 KeyPoints, and 304 exercises**. Their independent textbook views contain **14 sources, 500 catalog nodes, and 374 TEACHES mappings**.
 
 Textbook order describes a publisher's teaching arrangement. PREREQUISITE describes dependencies in the shared knowledge graph. Keeping these relations separate supports comparisons across textbooks while preserving the common knowledge structure.
 

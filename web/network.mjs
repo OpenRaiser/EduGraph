@@ -1,3 +1,4 @@
+import {STAGES} from './model.mjs';
 const NS='http://www.w3.org/2000/svg';
 const colors={focus:['#5d8aa8','#416f90'],prerequisite:['#f0d3b4','#bf9467'],successor:['#c4dbe9','#7e9fb9'],topic:['#ded2e9','#a792bb']};
 function el(tag,attrs={},text){const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,String(v));if(text!==undefined)n.textContent=text;return n;}
@@ -71,7 +72,7 @@ export class NetworkView{
       const lines=chars.length<=max?[n.name]:[chars.slice(0,max).join(''),chars.slice(max,max*2-1).join('')+(chars.length>=max*2?'…':'')];
       lines.forEach((s,i)=>t.append(el('tspan',{x:0,dy:i?14:0},s)));g.append(t);
       const title=el('title',{},n.name);g.append(title);
-      g.addEventListener('pointerenter',e=>{if(this.drag)return;this.tooltip.hidden=false;this.tooltip.textContent=n.name+' · '+({primary:'小学',junior:'初中',senior:'高中'}[n.stage]??'');const r=this.svg.getBoundingClientRect();this.tooltip.style.left=Math.min(e.clientX-r.left+12,this.w-230)+'px';this.tooltip.style.top=Math.max(10,e.clientY-r.top-35)+'px';});
+      g.addEventListener('pointerenter',e=>{if(this.drag)return;this.tooltip.hidden=false;this.tooltip.textContent=n.name+' · '+(STAGES[n.stage]??'');const r=this.svg.getBoundingClientRect();this.tooltip.style.left=Math.min(e.clientX-r.left+12,this.w-230)+'px';this.tooltip.style.top=Math.max(10,e.clientY-r.top-35)+'px';});
       g.addEventListener('pointerleave',()=>{this.tooltip.hidden=true;});this.group.append(g);return g;
     });
     this.fit();this.update();

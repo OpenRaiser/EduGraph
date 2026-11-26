@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "version": "0.33.0",
+  "source_repository": "https://github.com/TapXWorld/ChinaTextbook",
+  "counts": {
+    "source_views": 1217,
+    "with_catalog": 1006,
+    "chapters": 11712,
+    "teaches": 3040
+  },
+  "checksums": {
+    "textbooks.jsonl": "1abd6e6773d1607b412650c86d18c72427f32705e8bf9ba263e7ee4d78829fd8",
+    "chapters.jsonl": "29deba3ea22adee2bd3ee064ffc4cabcca5387caf392f8eb8b004974d8289fa2",
+    "teaches.jsonl": "619a6b2f72635772bdcef415f5d6f6a9361960ba514c63f0c8739dbb4b917521",
+    "source-links.jsonl": "c4938530a0eab1d43bfcdb0c691caa4368c4d0ac84d17ef4d2225cf7f8b1540d"
+  },
+  "review": "Machine-derived source views; no claim of teacher review or canonical edition identity.",
+  "scope": "Independent source catalogs with directory or chapter-body evidence; textbook identities remain separate.",
+  "countDefinitions": {
+    "with_catalog": "Source views with at least one stored directory entry; this measures presence, not completeness of the original table of contents."
+  }
+}

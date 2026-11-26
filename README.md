@@ -11,11 +11,11 @@
 **Connected Knowledge for Education Agents**
 
 面向教育 Agent 的开放知识图谱与数据基础设施。<br>
-连接课标、知识点、先修关系、教材、讲解与习题，让教学资源可检索、知识关系可探索。
+连接课程要求、知识点、先修关系、教材、讲解与习题，让教学资源可检索、知识关系可探索。
 
 <p>
   <a href="https://openraiser.github.io/EduGraph/"><img src="https://img.shields.io/badge/EXPLORE-LIVE-2563a8?style=for-the-badge&amp;logo=githubpages&amp;logoColor=white" alt="Explore EduGraph online"></a>
-  <img src="https://img.shields.io/badge/CONCEPTS-8%2C938-2aa7c7?style=for-the-badge" alt="8938 Concepts">
+  <img src="https://img.shields.io/badge/CONCEPTS-9%2C242-2aa7c7?style=for-the-badge" alt="9242 Concepts">
   <img src="https://img.shields.io/badge/SUBJECTS-18-f18b42?style=for-the-badge" alt="18 Subjects">
   <a href="LICENSE"><img src="https://img.shields.io/badge/CODE-Apache_2.0-607f9e?style=for-the-badge" alt="Code license Apache 2.0"></a>
   <a href="LICENSE-DATA"><img src="https://img.shields.io/badge/DATA-CC_BY--SA_4.0-17365c?style=for-the-badge" alt="Data license CC BY-SA 4.0"></a>
@@ -71,7 +71,7 @@ EduGraph 以 **Concept（知识点）** 为共同标识，将这些信息组织�
 ### 📚 在同一知识点下查看教学资源
 
 - **讲解与练习**：查看 KeyPoints、例题、答案与解析。
-- **课程要求**：通过课标关联了解知识点对应的课程要求。
+- **课程要求**：关联中小学课程标准与大学教学大纲，查看知识点对应的学习要求。
 - **教材对照**：比较不同出版社的册次、章节顺位与教学角色，切换独立教材目录视图。
 
 ### 🛠️ 复用数据，构建教育应用
@@ -95,6 +95,7 @@ EduGraph 以 **Concept（知识点）** 为共同标识，将这些信息组织�
 |:---|:---|
 | [**分数** →](https://openraiser.github.io/EduGraph/#/concept/mathematics.primary.number-and-algebra.number-and-operations.decimals-and-fractions.fractions) | 点击关联节点，查看讲解与例题，再对照不同教材中的教学位置。 |
 | [**小数与分数的互化** →](https://openraiser.github.io/EduGraph/#/concept/mathematics.primary.number-and-algebra.number-and-operations.decimals-and-fractions.decimal-fraction-conversion) | 查看前置知识，标记已掌握内容，生成通向目标知识点的学习顺序。 |
+| [**矩阵乘法** →](https://openraiser.github.io/EduGraph/#/concept/mathematics.university.linear-algebra.matrix.matrix-multiplication) | 探索大学线性代数中的知识依赖，查看讲解、习题与教材关联。 |
 | [**数据集与下载** →](https://openraiser.github.io/EduGraph/#/about) | 了解数据结构与规模，获取完整公开数据包。 |
 
 <a id="quickstart"></a>
@@ -130,7 +131,7 @@ npm run dev
 |:---|:---|:---|
 | `REFINES` | 子节点 → 父主题 | 组织知识分类与层级。 |
 | `PREREQUISITE` | 前置 Concept → 后继 Concept | 查询学习依赖并规划学习顺序。 |
-| `COVERS` | 课标条目 → Concept | 将课程要求绑定到知识点。 |
+| `COVERS` | 课程要求条目 → Concept | 将课标或教学大纲中的学习要求绑定到知识点。 |
 | `TEACHES` | 教材章节 → Concept | 记录教学位置及主讲、复习、提及等角色。 |
 | `kp_key` / `kp_keys` | 讲解 / 习题 → Concept | 检索知识点对应的教学资源。 |
 
@@ -140,18 +141,18 @@ npm run dev
 
 ## 📊 数据概览
 
-EduGraph 覆盖 **18 个学科**，知识网络横跨**小学、初中和高中**。下表统计共享主图；教材来源视图单独列示。
+EduGraph 覆盖 **18 个学科**，知识网络横跨**小学、初中、高中和大学**。大学数学包括**线性代数、高等数学、概率论与数理统计、离散数学**。下表统计共享主图，教材来源视图单独列示。
 
 | 知识与关系 | 数量 | 教学资源 | 数量 |
 |:---|---:|:---|---:|
-| Concept · 知识点 | **8,938** | KeyPoint · 讲解要点 | **19,562** |
-| Topic · 主题 | **1,676** | Exercise · 习题 | **10,795** |
-| PREREQUISITE · 先修关系 | **6,447** | StandardItem · 课标条目 | **5,463** |
-| REFINES · 分类层级 | **10,303** | Textbook · 教材册次 | **1,161** |
-| COVERS · 课标关联 | **13,636** | Chapter · 教材章节 | **12,607** |
-| TEACHES · 教材关联 | **23,411** | Subject / Stage · 学科 / 学段 | **18 / 3** |
+| Concept · 知识点 | **9,242** | KeyPoint · 讲解要点 | **20,215** |
+| Topic · 主题 | **1,717** | Exercise · 习题 | **11,099** |
+| PREREQUISITE · 先修关系 | **6,674** | StandardItem · 课程要求条目 | **5,631** |
+| REFINES · 分类层级 | **10,644** | Textbook · 教材册次 | **1,161** |
+| COVERS · 课程关联 | **13,956** | Chapter · 教材章节 | **12,607** |
+| TEACHES · 教材关联 | **23,411** | Subject / Stage · 学科 / 学段 | **18 / 4** |
 
-**独立教材来源视图**：1,203 份视图、11,212 个目录节点及 2,666 条章节—知识点关联。不同来源分别保留目录结构，与主图教材存在对应关系，因此两类教材数量分别统计。
+**独立教材来源视图**：1,217 份视图、11,712 个目录节点及 3,040 条章节—知识点关联。每个来源保留独立的目录结构，并通过共享知识点与主图连接。
 
 <details>
 <summary><b>查看覆盖学科</b></summary>

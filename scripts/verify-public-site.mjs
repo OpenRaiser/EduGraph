@@ -3,6 +3,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
+import {STAGES} from '../web/model.mjs';
 
 export function verifyReleaseArchive(archive,version='0.24.0'){
   const listing=execFileSync('tar',['-tzf',archive],{encoding:'utf8'}).split(/\r?\n/).filter(Boolean);
@@ -55,7 +56,7 @@ export async function verifyPublicSite(root=fileURLToPath(new URL('../dist/',imp
     allowed.add(cover.asset);
   }
   for(const scope of manifest.scopes){
-    if(!/^[a-z]+(?:-[a-z]+)*$/.test(scope.subject)||!['primary','junior','senior'].includes(scope.stage))throw new Error('Invalid public resource partition');
+    if(!/^[a-z]+(?:-[a-z]+)*$/.test(scope.subject)||!Object.hasOwn(STAGES,scope.stage))throw new Error('Invalid public resource partition');
     allowed.add(`data/resources/${scope.subject}/${scope.stage}.json`);
   }
   const files=await listFiles(root);verifyArtifactPaths(files,allowed);
