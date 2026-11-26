@@ -1,7 +1,12 @@
 import { DependencyGraph } from './core/graph.mjs';
 import { InvertedIndex, search } from './core/bm25.mjs';
 export const SUBJECTS={mathematics:'数学',chinese:'语文',english:'英语',physics:'物理',chemistry:'化学',biology:'生物',history:'历史',geography:'地理',politics:'道德与法治',science:'科学','information-technology':'信息技术',music:'音乐','fine-arts':'美术',arts:'艺术','general-technology':'通用技术','physical-education':'体育与健康',japanese:'日语',russian:'俄语'};
-export const STAGES={primary:'小学',junior:'初中',senior:'高中'};
+export const STAGES={primary:'小学',junior:'初中',senior:'高中',university:'大学'};
+export function standardLabel(record,fallbackStage=''){
+  const stage=record?.applicable_stage??record?.stage??fallbackStage;
+  if(stage==='university'||record?.school_stage==='大学'||record?.standard_family==='university-syllabus')return '教学大纲';
+  return record?.standard_family==='gaokao-outline'?'考试大纲':'课程标准';
+}
 export function createModel(data,indexData){
   const nodes=data.nodes.map((n,id)=>({...n,id}));
   const byKey=new Map(nodes.map(n=>[n.key,n]));

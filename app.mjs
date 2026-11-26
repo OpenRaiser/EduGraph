@@ -1,4 +1,4 @@
-import {createModel,findNodes,neighborhood,degree,pathEvidence,orderChapters,statusLabel,SUBJECTS,STAGES} from './model.mjs';
+import {createModel,findNodes,neighborhood,degree,pathEvidence,orderChapters,statusLabel,standardLabel,SUBJECTS,STAGES} from './model.mjs';
 import {NetworkView} from './network.mjs';
 import {resolveCover} from './covers.mjs';
 import {renderHero} from './hero.mjs';
@@ -62,8 +62,8 @@ function renderHeading(){
   $('#open-path').disabled=n.node_kind==='topic';$('#open-path').title=n.node_kind==='topic'?'请先选择一个具体知识点':'生成先修学习路径';
 }
 function renderTabCounts(){
-  const r=entry();const counts={keypoints:r.keypoints.length,exercises:r.exercises.length,textbooks:booksForConcept().length,standards:r.standards.length};
-  for(const b of $$('#detail-tabs button')){const names={keypoints:'讲解',exercises:'例题',textbooks:'教材',standards:'课标'};b.innerHTML=`${names[b.dataset.tab]}<span class="tab-count">${counts[b.dataset.tab]}</span>`;}
+  const n=model.byKey.get(state.key),r=entry();const counts={keypoints:r.keypoints.length,exercises:r.exercises.length,textbooks:booksForConcept().length,standards:r.standards.length};
+  for(const b of $$('#detail-tabs button')){const names={keypoints:'讲解',exercises:'例题',textbooks:'教材',standards:n.stage==='university'?'教学大纲':'课标'};b.innerHTML=`${names[b.dataset.tab]}<span class="tab-count">${counts[b.dataset.tab]}</span>`;}
 }
 function renderResults(){
   if(!model)return;$('#result-list').classList.toggle('tree-mode',state.browse==='tree');
@@ -98,6 +98,7 @@ function renderCenter(){
 function setView(view){state.view=view;for(const b of $$('.view-switch button')){const active=b.id===`view-${view}`;b.classList.toggle('active',active);b.setAttribute('aria-selected',active);}renderCenter();}
 async function renderDetail(){
   const n=model.byKey.get(state.key),r=entry(),token=state.request;
+  const requirement=n.stage==='university'?'教学大纲':'课标';
   for(const b of $$('#detail-tabs button')){const active=b.dataset.tab===state.tab;b.classList.toggle('active',active);b.setAttribute('aria-selected',active);}
   if(!currentResources)return;
   let html='';
@@ -107,7 +108,7 @@ async function renderDetail(){
   }else if(state.tab==='keypoints'){
     const kind={definition:'定义',property:'性质',formula:'公式',method:'方法',pitfall:'易错点',example:'示例'};
     html=r.keypoints.map(k=>`<article class="resource-card"><div class="card-label"><i></i>${esc(kind[k.kind]??k.kind)}</div><h3>${esc(k.title)}</h3><p>${esc(k.body)}</p>${reviewTags(k)}</article>`).join('');
-    if(!r.keypoints.length)html=`<div class="empty-state"><strong>本节点无独立讲解记录</strong>可查看所属主题${r.standards.length?'和课标要求':''}。${r.standards.length?'<br><button class="text-button" data-open-standards>查看课标依据 →</button>':''}</div>`;
+    if(!r.keypoints.length)html=`<div class="empty-state"><strong>本节点无独立讲解记录</strong>可查看所属主题${r.standards.length?'和'+requirement+'要求':''}。${r.standards.length?`<br><button class="text-button" data-open-standards>查看${requirement}依据 →</button>`:''}</div>`;
     const direct=model.graph.successors.get(n.key)??[];
     if(direct.length)html+=`<div class="section-mini">以此为基础，可以继续学习</div>${direct.slice(0,8).map(e=>nodeLink(e.to,model.byKey.get(e.to)?.name??e.to,'related-link')).join('')}`;
   }else if(state.tab==='exercises'){
@@ -120,9 +121,9 @@ async function renderDetail(){
     html+=books.map(({book,mappings,sourceMappings,sources})=>`<article class="resource-card textbook-mini"><div class="book-overview">${bookCover(book)}<div class="book-meta"><h3 class="publisher-name">${esc(publisherLabel(book))}</h3><p>${esc(volumeLabel(book))}</p><p class="book-edition">${esc(editionLabel(book))} · ${esc(SUBJECTS[book.subject])}</p></div></div>${mappings.map(({teach,chapter})=>`<div class="book-position"><span>章节顺位 ${esc(chapter.order)}</span><small>${roleName(teach.role)} · ${esc(statusLabel(teach.review_status))}${teach.uncertain?' · 待核':''}</small></div>`).join('')}${sources.length?`<p class="source-catalog-summary">另有 ${sources.length} 份独立目录视图${sourceMappings.length?` · ${sourceMappings.length} 条当前知识点候选关联`:''}</p>`:''}<button class="button" data-book="${esc(book.textbook_id)}">查看教材目录视图 →</button></article>`).join('');
     if(!books.length)html+='<div class="empty-state">本节点无教材关联记录，可从其他知识点查看教材编排。</div>';
   }else if(state.tab==='standards'){
-    $('#detail-content').innerHTML='<div class="loading-inline">正在读取课标条目…</div>';
+    $('#detail-content').innerHTML=`<div class="loading-inline">正在读取${requirement}条目…</div>`;
     try{if(!standardsPromise)standardsPromise=fetchJson('data/standards.json').then(rows=>new Map(rows.map(s=>[s.id,s]))).catch(e=>{standardsPromise=null;throw e;});const all=await standardsPromise;if(token!==state.request||state.tab!=='standards')return;
-      html=r.standards.map(link=>{const s=all.get(link.from);if(!s)return'';return`<article class="resource-card standard-card"><div class="card-label">${s.standard_family==='gaokao-outline'?'考试大纲':'课程标准'} · COVERS</div><div class="standard-meta">${esc(s.education_phase||'')} ${esc(s.school_stage||STAGES[s.applicable_stage]||'')} ${s.grade_band?'· '+esc(s.grade_band)+' 年级':''}</div><p>${esc(s.text)}</p>${reviewTags(link)}<div class="source-id">${esc(s.id)}</div></article>`;}).join('')||'<div class="empty-state">本节点无独立课标关联记录，可查看所属主题与知识关系。</div>';
+      html=r.standards.map(link=>{const s=all.get(link.from);if(!s)return'';return`<article class="resource-card standard-card"><div class="card-label">${esc(standardLabel(s,n.stage))} · COVERS</div><div class="standard-meta">${esc(s.education_phase||'')} ${esc(s.school_stage||STAGES[s.applicable_stage]||'')} ${s.grade_band?'· '+esc(s.grade_band)+' 年级':''}</div><p>${esc(s.text)}</p>${reviewTags(link)}<div class="source-id">${esc(s.id)}</div></article>`;}).join('')||`<div class="empty-state">本节点无独立${requirement}关联记录，可查看所属主题与知识关系。</div>`;
     }catch(e){html=`<div class="empty-state">${esc(e.message)}<br><button id="retry-standard" class="retry-button">重试</button></div>`;}
   }
   if(token!==state.request)return;$('#detail-content').innerHTML=html;$('#detail-content').scrollTop=0;
@@ -171,7 +172,7 @@ function renderPath(){
   $('#known-summary').textContent=`已标记 ${known.size} 个知识点为已掌握 · 仅保存在此浏览器`;
   $('#path-footnote').textContent=evidence.hasPrerequisites?'先修约束下的一条可行顺序；教材编排可单独查看。':'缺少先修记录不等于无需前置知识。';
   if(!evidence.hasPrerequisites){
-    $('#path-content').innerHTML='<div class="empty-state"><strong>本节点无先修关系记录</strong>可查看课标要求、所属主题与教材编排。</div>';
+    $('#path-content').innerHTML='<div class="empty-state"><strong>本节点无先修关系记录</strong>可查看课程要求、所属主题与教材编排。</div>';
     return;
   }
   try{const plan=model.graph.learningPath([n.key],[...known],{maxLength:500});
