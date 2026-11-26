@@ -95,7 +95,7 @@ EduGraph 以 **Concept（知识点）** 为共同标识，将这些信息组织�
 |:---|:---|
 | [**分数** →](https://openraiser.github.io/EduGraph/#/concept/mathematics.primary.number-and-algebra.number-and-operations.decimals-and-fractions.fractions) | 点击关联节点，查看讲解与例题，再对照不同教材中的教学位置。 |
 | [**小数与分数的互化** →](https://openraiser.github.io/EduGraph/#/concept/mathematics.primary.number-and-algebra.number-and-operations.decimals-and-fractions.decimal-fraction-conversion) | 查看前置知识，标记已掌握内容，生成通向目标知识点的学习顺序。 |
-| [**矩阵乘法** →](https://openraiser.github.io/EduGraph/#/concept/mathematics.university.linear-algebra.matrix.matrix-multiplication) | 探索大学线性代数中的知识依赖，查看讲解、习题与教材关联。 |
+| [**矩阵乘法** →](https://openraiser.github.io/EduGraph/#/concept/mathematics.university.linear-algebra.matrix.matrix-multiplication) | 探索大学线性代数中的知识依赖，查看讲解、习题与教学大纲。 |
 | [**数据集与下载** →](https://openraiser.github.io/EduGraph/#/about) | 了解数据结构与规模，获取完整公开数据包。 |
 
 <a id="quickstart"></a>
