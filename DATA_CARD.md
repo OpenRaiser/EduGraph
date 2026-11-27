@@ -27,12 +27,12 @@ Independent textbook-source views organize each source's catalog separately whil
 |---|---:|
 | Independent catalog views | 1,217 |
 | Views with catalog structure | 1,006 |
-| Catalog chapter nodes | 11,712 |
-| Chapter-to-Concept mappings | 3,040 |
+| Catalog chapter nodes | 11,738 |
+| Chapter-to-Concept mappings | 3,198 |
 
 A view can link to one or more main-graph textbook candidates. Source-view and main-graph textbook counts are reported separately. Each catalog preserves its own hierarchy, chapter order, and recorded page positions. The explorer also exposes a primary integrated-arts source-catalog partition.
 
-University resources comprise **304 Concepts, 41 Topics, 653 KeyPoints, and 304 exercises**. Their independent textbook views contain **14 sources, 500 catalog nodes, and 374 TEACHES mappings**.
+University resources comprise **304 Concepts, 41 Topics, 653 KeyPoints, and 304 exercises**. Their independent textbook views contain **14 sources, 526 catalog nodes, and 532 TEACHES mappings**.
 
 Textbook order describes a publisher's teaching arrangement. PREREQUISITE describes dependencies in the shared knowledge graph. Keeping these relations separate supports comparisons across textbooks while preserving the common knowledge structure.
 
